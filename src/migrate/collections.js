@@ -5,7 +5,7 @@ var MigrateCollections = {
     guessCollectionSpecVersion(c) {
         var version = "0.4";
         // Try to guess a version
-        if (typeof c.id === 'undefined') { // No id defined, probably v0.3
+        if (typeof c.id === 'undefined' && typeof c.name !== 'undefined') { // No id defined, probably v0.3
             version = "0.3";
         }
         return version;
@@ -20,8 +20,10 @@ var MigrateCollections = {
         // convert v0.3 processes to v0.4 format
         if (Utils.compareVersion(version, "0.3.x") === 0) {
             // name => id
-            collection.id = collection.name;
-            delete collection.name;
+            if (typeof collection.name !== 'undefined') {
+                collection.id = collection.name;
+                delete collection.name;
+            }
             // Add stac_version
             collection.stac_version = '0.6.1';
             // Rename provider => providers
@@ -39,6 +41,7 @@ var MigrateCollections = {
                     delete collection[key];
                 }
             }
+            // ToDo: Also migrate extensions such as the bands
         }
         return collection;
     }

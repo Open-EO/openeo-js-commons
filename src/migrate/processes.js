@@ -5,7 +5,7 @@ var MigrateProcesses = {
     guessProcessSpecVersion(p) {
         var version = "0.4";
         // Try to guess a version
-        if (typeof p.id === 'undefined') { // No id defined, probably v0.3
+        if (typeof p.id === 'undefined' && typeof p.name !== 'undefined') { // No id defined, probably v0.3
             version = "0.3";
         }
         return version;
@@ -20,8 +20,10 @@ var MigrateProcesses = {
         // convert v0.3 processes to v0.4 format
         if (Utils.compareVersion(version, "0.3.x") === 0) {
             // name => id
-            process.id = process.name;
-            delete process.name;
+            if (typeof process.name !== 'undefined') {
+                process.id = process.name;
+                delete process.name;
+            }
             // mime_type => media_type
             if (typeof process.parameters === 'object') {
                 for(var key in process.parameters) {
@@ -32,12 +34,12 @@ var MigrateProcesses = {
                     }
                 }
             }
-            if (typeof process.returns.mime_type !== 'undefined') {
+            if (typeof process.returns === 'object' && typeof process.returns.mime_type !== 'undefined') {
                 process.returns.media_type = process.returns.mime_type;
                 delete process.returns.mime_type;
             }
             // exception object
-            if (process.exceptions) {
+            if (typeof process.exceptions === 'object') {
                 for(var key in process.exceptions) {
                     if (typeof process.exceptions[key].message === 'undefined') {
                         process.exceptions[key].message = process.exceptions[key].description;
@@ -45,7 +47,7 @@ var MigrateProcesses = {
                 }
             }
             // examples object
-            if (process.examples) {
+            if (typeof process.examples === 'object') {
                 var examples = [];
                 for(var key in process.examples) {
                     var old = process.examples[key];

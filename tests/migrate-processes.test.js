@@ -114,6 +114,7 @@ describe('Basic Process Migration Tests', () => {
 		expect(MigrateProcesses.guessProcessSpecVersion(expectedProcess)).toBe("0.4");
 	});
 	test('Migrate Process', () => {
+		expect(MigrateProcesses.convertProcessToLatestSpec({})).toEqual({});
 		// Test that a legacy process gets converted
 		expect(MigrateProcesses.convertProcessToLatestSpec(legacyProcess)).toEqual(expectedProcess);
 		expect(MigrateProcesses.convertProcessToLatestSpec(legacyProcess, "0.3.1")).toEqual(expectedProcess);

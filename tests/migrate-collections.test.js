@@ -87,6 +87,7 @@ describe('Basic Collection Migration Tests', () => {
 		expect(MigrateCollections.guessCollectionSpecVersion(expectedCollection)).toBe("0.4");
 	});
 	test('Migrate Collection', () => {
+		expect(MigrateCollections.convertCollectionToLatestSpec({})).toEqual({});
 		// Test that a legacy collection gets converted
 		expect(MigrateCollections.convertCollectionToLatestSpec(legacyCollection)).toEqual(expectedCollection);
 		expect(MigrateCollections.convertCollectionToLatestSpec(legacyCollection, "0.3.1")).toEqual(expectedCollection);

@@ -34,6 +34,24 @@ var MigrateCollections = {
             if (typeof collection.properties !== 'object') {
                 collection.properties = {};
             }
+            // Migrate eo:bands
+            if (collection['eo:bands'] !== null && typeof collection['eo:bands'] === 'object' && !Array.isArray(collection['eo:bands'])) {
+                var bands = [];
+                for(var key in collection['eo:bands']) {
+                    var band = collection['eo:bands'][key];
+                    band.name = key;
+                    if (typeof band.resolution !== 'undefined' && typeof band.gsd === 'undefined') {
+                        band.gsd = band.resolution;
+                        delete band.resolution;
+                    }
+                    if (typeof band.wavelength !== 'undefined' && typeof band.center_wavelength === 'undefined') {
+                        band.center_wavelength = band.wavelength;
+                        delete band.wavelength;
+                    }
+                    bands.push(band);
+                }
+                collection['eo:bands'] = bands;
+            }
             // Move all other properties into properties.
             for (var key in collection) {
                 if (key.includes(':')) {
@@ -41,7 +59,6 @@ var MigrateCollections = {
                     delete collection[key];
                 }
             }
-            // ToDo: Also migrate extensions such as the bands
         }
         return collection;
     }

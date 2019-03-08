@@ -36,7 +36,14 @@ var legacyCollection = {
 	"sci:citation": "Copernicus Sentinel data [Year]",
 	"eo:epsg": 32632,
 	"eo:platform": "sentinel-2a",
-	"eo:constellation": "sentinel-2"
+	"eo:constellation": "sentinel-2",
+	"eo:bands": {
+		"B1": {
+			"common_name": "coastal",
+			"resolution": 10,
+			"wavelength": 0.4
+		}
+	}
 };
 
 var expectedCollection = {
@@ -77,7 +84,15 @@ var expectedCollection = {
 		"sci:citation": "Copernicus Sentinel data [Year]",
 		"eo:epsg": 32632,
 		"eo:platform": "sentinel-2a",
-		"eo:constellation": "sentinel-2"
+		"eo:constellation": "sentinel-2",
+		"eo:bands": [
+			{
+				"name": "B1",
+				"common_name": "coastal",
+				"gsd": 10,
+				"center_wavelength": 0.4
+			}
+		]
 	}
 };
 

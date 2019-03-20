@@ -20,17 +20,17 @@ var MigrateProcesses = {
         // convert v0.3 processes to v0.4 format
         if (Utils.compareVersion(version, "0.3.x") === 0) {
             // name => id
-            if (typeof process.name !== 'undefined') {
-                process.id = process.name;
-                delete process.name;
-            }
+            process.id = process.name;
+            delete process.name;
+
             // mime_type => media_type
             if (typeof process.parameters === 'object') {
                 for(var key in process.parameters) {
-                    var param = process.parameters[key];
-                    if (typeof param.mime_type !== 'undefined') {
+                    if (typeof process.parameters[key].mime_type !== 'undefined') {
+                        var param = Object.assign({}, process.parameters[key]);
                         param.media_type = param.mime_type;
                         delete param.mime_type;
+                        process.parameters[key] = param;
                     }
                 }
             }
@@ -41,8 +41,11 @@ var MigrateProcesses = {
             // exception object
             if (typeof process.exceptions === 'object') {
                 for(var key in process.exceptions) {
-                    if (typeof process.exceptions[key].message === 'undefined') {
-                        process.exceptions[key].message = process.exceptions[key].description;
+                    var e = process.exceptions[key];
+                    if (typeof e.message === 'undefined') {
+                        process.exceptions[key] = Object.assign({}, e, {
+                            message: e.description
+                        });
                     }
                 }
             }

@@ -24,6 +24,22 @@ var expectedMinimalCollection = {
 	"properties": {}
 };
 
+var legacyBandCollection = Object.assign({}, legacyMinimalCollection, {
+	"eo:bands": {
+		"B1": {}
+	}
+});
+
+var expectedBandCollection = Object.assign({}, expectedMinimalCollection, {
+	"properties": {
+		"eo:bands": [
+			{
+				"name": "B1"
+			}
+		]
+	}
+});
+
 var legacyCollection = Object.assign({}, legacyMinimalCollection, {
 	"title": "Sentinel-2A MSI L1C",
 	"keywords": [
@@ -50,6 +66,7 @@ var legacyCollection = Object.assign({}, legacyMinimalCollection, {
 			"title": "ESA Sentinel-2 MSI Level-1C User Guide"
 		}
 	],
+	"properties": {},
 	"sci:citation": "Copernicus Sentinel data [Year]",
 	"eo:epsg": 32632,
 	"eo:platform": "sentinel-2a",
@@ -112,8 +129,10 @@ describe('Basic Collection Migration Tests', () => {
 	});
 	test('Migrate Collection', () => {
 		expect(MigrateCollections.convertCollectionToLatestSpec({})).toEqual({});
+		expect(MigrateCollections.convertCollectionToLatestSpec({}, "0.3.0")).toEqual({});
 		// Test that a legacy collection gets converted
 		expect(MigrateCollections.convertCollectionToLatestSpec(legacyMinimalCollection)).toEqual(expectedMinimalCollection);
+		expect(MigrateCollections.convertCollectionToLatestSpec(legacyBandCollection, "0.3.0")).toEqual(expectedBandCollection);
 		expect(MigrateCollections.convertCollectionToLatestSpec(legacyCollection)).toEqual(expectedCollection);
 		expect(MigrateCollections.convertCollectionToLatestSpec(legacyCollection, "0.3.1")).toEqual(expectedCollection);
 		// Test that a collection following the latest spec doesn't change at all

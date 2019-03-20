@@ -161,13 +161,29 @@ describe('Basic Capabilities Migration Tests', () =>  {
 		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(expectedCapability)).toEqual(expectedCapability);
 		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(expectedCapability, "0.4.0")).toEqual(expectedCapability);
 	});
+	test('Migrate Billing Info', () => {
+		expect(MigrateCapabilities.convertBillingToLatestSpec({}, "0.3.0")).toEqual({});
+		// Test that legacy endpoints get converted
+		expect(MigrateCapabilities.convertBillingToLatestSpec(legacyCapability.billing, "0.3.1")).toEqual(expectedCapability.billing);
+		// Test that endpoints following the latest spec doesn't change at all
+		expect(MigrateCapabilities.convertBillingToLatestSpec(expectedCapability.billing, "0.4.0")).toEqual(expectedCapability.billing); 
+	});
+	test('Migrate Endpoints', () => {
+		expect(MigrateCapabilities.convertEndpointsToLatestSpec([], "0.3.0")).toEqual([]);
+		// Test that legacy endpoints get converted
+		expect(MigrateCapabilities.convertEndpointsToLatestSpec(legacyCapability.endpoints, "0.3.1")).toEqual(expectedCapability.endpoints);
+		// Test that endpoints following the latest spec doesn't change at all
+		expect(MigrateCapabilities.convertEndpointsToLatestSpec(expectedCapability.endpoints, "0.4.0")).toEqual(expectedCapability.endpoints); 
+	});
 	test('Migrate Output Formats', () => {
+		expect(MigrateCapabilities.convertOutputFormatsToLatestSpec({}, "0.3.0")).toEqual({});
 		// Test that legacy output formats get converted
 		expect(MigrateCapabilities.convertOutputFormatsToLatestSpec(legacyOutputFormats, "0.3.1")).toEqual(expectedOutputFormats);
 		// Test that output formats following the latest spec doesn't change at all
 		expect(MigrateCapabilities.convertOutputFormatsToLatestSpec(expectedOutputFormats, "0.4.0")).toEqual(expectedOutputFormats); 
 	}); 
 	test('Migrate Service Types', () =>  {
+		expect(MigrateCapabilities.convertServiceTypesToLatestSpec({}, "0.3.0")).toEqual({});
 		// Test that legacy service types gets converted
 		expect(MigrateCapabilities.convertServiceTypesToLatestSpec(serviceTypes, "0.3.1")).toEqual(serviceTypes); // Nothing has changed, don't change anything
 		// Test that service types following the latest spec doesn't change at all

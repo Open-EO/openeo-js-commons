@@ -63,6 +63,28 @@ endpoints04.push(
   }
 );
 
+var flattenedEndpoints = [
+  "get /output_formats",
+  "get /collections",
+  "get /collections/{}",
+  "get /processes"
+];
+
+var expectedReportFromFlattened = {
+  "Basic functionality": 2,
+  "Authenticate with HTTP Basic": 0,
+  "Authenticate with OpenID Connect": 0,
+  "Batch processing": 0,
+  "Estimate processing costs": 0,
+  "Preview processing results": 0,
+  "Secondary web services": 0,
+  "File storage": 0,
+  "Stored process graphs": 0,
+  "Validate process graphs": 0,
+  "Notifications and monitoring": 0,
+  "User defined functions (UDF)": 0
+};
+
 var expectedEndpointList04 = {
   "Basic functionality": [
     "get /collections",
@@ -160,9 +182,12 @@ describe('Basic Collection Migration Tests', () => {
   test('Get Report', () => {
     var report03 = FL.getReport(endpoints03, "0.3.1");
     var report04 = FL.getReport(endpoints04, "0.4.0");
+    var reportFlattened = FL.getReport(flattenedEndpoints, "0.4.0", false);
     expect(report03.count).toBe(4);
     expect(report04.count).toBe(4);
+    expect(reportFlattened.count).toBe(1);
     expect(report03.list).toEqual(expectedReport);
     expect(report04.list).toEqual(expectedReport);
+    expect(reportFlattened.list).toEqual(expectedReportFromFlattened);
   });
 });

@@ -14,16 +14,18 @@ var MigrateCollections = {
     // Always returns a copy of the input collection object
     convertCollectionToLatestSpec: function(originalCollection, version = null) {
         var collection = Object.assign({}, originalCollection);
+        if (!Object.keys(collection).length) {
+            return collection;
+        }
         if (version === null) {
             version = this.guessCollectionSpecVersion(collection);
         }
         // convert v0.3 processes to v0.4 format
         if (Utils.compareVersion(version, "0.3.x") === 0) {
             // name => id
-            if (typeof collection.name !== 'undefined') {
-                collection.id = collection.name;
-                delete collection.name;
-            }
+            collection.id = collection.name;
+            delete collection.name;
+
             // Add stac_version
             collection.stac_version = '0.6.1';
             // Rename provider => providers
@@ -38,7 +40,7 @@ var MigrateCollections = {
             if (collection['eo:bands'] !== null && typeof collection['eo:bands'] === 'object' && !Array.isArray(collection['eo:bands'])) {
                 var bands = [];
                 for(var key in collection['eo:bands']) {
-                    var band = collection['eo:bands'][key];
+                    var band = Object.assign({}, collection['eo:bands'][key]);
                     band.name = key;
                     if (typeof band.resolution !== 'undefined' && typeof band.gsd === 'undefined') {
                         band.gsd = band.resolution;

@@ -24,26 +24,20 @@ var MigrateCapabilities = {
         if (version === null) {
             version = this.guessApiVersion(capabilities);
         }
-        // convert v0.3 processes to v0.4 format
+        // convert v0.3 capabilities to v0.4 format
         if (Utils.compareVersion(version, "0.3.x") === 0) {
             // version => api_version
             if (typeof capabilities.version !== 'undefined') {
                 delete capabilities.version;
             }
-            
-            // Add paid flag to billing plans
-            if (capabilities.billing !== null && typeof capabilities.billing === 'object' && Array.isArray(capabilities.billing.plans)) {
-                capabilities.billing.plans = capabilities.billing.plans.map(plan => {
-                    if (typeof plan.paid !== 'boolean') {
-                        plan.paid = true;
-                        if (typeof plan.name === 'string' && plan.name.toLowerCase().includes('free')) {
-                            plan.paid = false;
-                        }
-                    }
-                    return plan;
-                });
-            }
         }
+            
+        // Convert billing plans
+        if (typeof capabilities.billing !== 'undefined') {
+            capabilities.billing = this.convertBillingToLatestSpec(capabilities.billing, version);
+        }
+        // Convert endpoints
+        capabilities.endpoints = this.convertEndpointsToLatestSpec(capabilities.endpoints, version);
 
         // Add missing fields with somewhat useful data
         if (typeof capabilities.api_version !== 'string') {
@@ -58,19 +52,53 @@ var MigrateCapabilities = {
         if (typeof capabilities.description !== 'string') {
             capabilities.description = "No description provided.";
         }
-        if (!Array.isArray(capabilities.endpoints)) {
-            capabilities.endpoints = [];
-        }
 
         return capabilities;
     },
 
     // Always returns a copy of the input object
+    convertBillingToLatestSpec: function(originalBilling, version) {
+        var billing = Object.assign({}, originalBilling);
+        // convert v0.3 billing info to v0.4 format
+        if (Utils.compareVersion(version, "0.3.x") === 0) {
+            // Add paid flag to billing plans
+            if (Array.isArray(billing.plans)) {
+                billing.plans = billing.plans.map(plan => {
+                    if (typeof plan.paid !== 'boolean') {
+                        plan.paid = true;
+                        if (typeof plan.name === 'string' && plan.name.toLowerCase().includes('free')) {
+                            plan.paid = false;
+                        }
+                    }
+                    return plan;
+                });
+            }
+        }
+
+        return billing;
+    },
+
+    // Always returns a copy of the input object
+    convertEndpointsToLatestSpec: function(originalEndpoints, version) {
+        var endpoints = [];
+        if (Array.isArray(originalEndpoints)) {
+            endpoints = originalEndpoints.slice(0);
+        }
+        // convert v0.3 service types to v0.4 format
+        if (Utils.compareVersion(version, "0.3.x") === 0) {
+            // Nothing to do as nothing has changed.
+        }
+        return endpoints;
+    },
+
+    // Always returns a copy of the input object
     convertOutputFormatsToLatestSpec: function(originalFormats, version) {
         var formats = Object.assign({}, originalFormats);
-        // convert v0.3 processes to v0.4 format
+        // convert v0.3 output formats to v0.4 format
         if (Utils.compareVersion(version, "0.3.x") === 0) {
-            return formats.formats;
+            if (typeof formats.formats === 'object' && formats.formats !== null) {
+                return formats.formats;
+            }
         }
         return formats;
     },
@@ -78,7 +106,7 @@ var MigrateCapabilities = {
     // Always returns a copy of the input object
     convertServiceTypesToLatestSpec: function(originalTypes, version) {
         var types = Object.assign({}, originalTypes);
-        // convert v0.3 processes to v0.4 format
+        // convert v0.3 service types to v0.4 format
         if (Utils.compareVersion(version, "0.3.x") === 0) {
             // Nothing to do as nothing has changed.
         }

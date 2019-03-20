@@ -31,7 +31,7 @@ var MigrateCapabilities = {
                 delete capabilities.version;
             }
         }
-            
+
         // Convert billing plans
         if (typeof capabilities.billing !== 'undefined') {
             capabilities.billing = this.convertBillingToLatestSpec(capabilities.billing, version);
@@ -44,7 +44,7 @@ var MigrateCapabilities = {
             capabilities.api_version = "0.4.0";
         }
         if (typeof capabilities.backend_version !== 'string') {
-            capabilities.backend_version = capabilities.api_version;
+            capabilities.backend_version = "Unknown";
         }
         if (typeof capabilities.title !== 'string') {
             capabilities.title = title;

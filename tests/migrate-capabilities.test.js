@@ -28,15 +28,16 @@ var legacyCapability =  {
 };
 
 var emptyCapability =  {
-	"api_version":"0.4.0", 
-	"backend_version":"0.4.0", 
-	"title":"Unknown", 
-	"description":"No description provided.", 
-	"endpoints":[]
+	"api_version": "0.4.0",
+	"backend_version": "Unknown",
+	"title": "Unknown",
+	"description": "No description provided.",
+	"endpoints": []
 };
 
-var expectedCapability = Object.assign( {}, emptyCapability,  {
-	"endpoints":[ {
+var expectedCapability = Object.assign({}, emptyCapability,  {
+	"endpoints": [
+		{
 			"path":"/processes", 
 			"methods":[
 				"GET"
@@ -66,7 +67,9 @@ var expectedCapability = Object.assign( {}, emptyCapability,  {
 var invalidCapability =  {
 	"backend_version": "0.4.0",
 	"endpoints":[]
-}; 
+};
+
+var expectedInvalidCapability = Object.assign({}, emptyCapability, invalidCapability);
 
 var expectedOutputFormats = {
 	"GTiff": {
@@ -149,11 +152,11 @@ var serviceTypes = {
 describe('Basic Capabilities Migration Tests', () =>  {
 	test('Guess Api Versions', () =>  {
 		expect(MigrateCapabilities.guessApiVersion(legacyCapability)).toBe("0.3.1"); 
-		expect(MigrateCapabilities.guessApiVersion(expectedCapability)).toBe("0.4.0"); 
+		expect(MigrateCapabilities.guessApiVersion(emptyCapability)).toBe("0.4.0"); 
 	}); 
 	test('Migrate Capabilities', () =>  {
 		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec({})).toEqual(emptyCapability);
-		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(invalidCapability)).toEqual(emptyCapability); 
+		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(invalidCapability)).toEqual(expectedInvalidCapability); 
 		// Test that legacy capabilities get converted
 		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(legacyCapability)).toEqual(expectedCapability); 
 		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(legacyCapability, "0.3.1")).toEqual(expectedCapability); 

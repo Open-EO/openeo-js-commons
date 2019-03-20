@@ -27,25 +27,41 @@ var MigrateCapabilities = {
         // convert v0.3 processes to v0.4 format
         if (Utils.compareVersion(version, "0.3.x") === 0) {
             // version => api_version
-			capabilities.api_version = "0.4.0";
             if (typeof capabilities.version !== 'undefined') {
                 delete capabilities.version;
-			}
-
-			// Add missing fields with somewhat useful data
-            if (typeof capabilities.backend_version !== 'string') {
-                capabilities.backend_version = capabilities.api_version;
-			}
-            if (typeof capabilities.title !== 'string') {
-                capabilities.title = title;
-			}
-            if (typeof capabilities.description !== 'string') {
-                capabilities.description = "No description provided.";
-			}
-            if (!Array.isArray(capabilities.endpoints)) {
-                capabilities.endpoints = [];
-			}
+            }
+            
+            // Add paid flag to billing plans
+            if (capabilities.billing !== null && typeof capabilities.billing === 'object' && Array.isArray(capabilities.billing.plans)) {
+                capabilities.billing.plans = capabilities.billing.plans.map(plan => {
+                    if (typeof plan.paid !== 'boolean') {
+                        plan.paid = true;
+                        if (typeof plan.name === 'string' && plan.name.toLowerCase().includes('free')) {
+                            plan.paid = false;
+                        }
+                    }
+                    return plan;
+                });
+            }
         }
+
+        // Add missing fields with somewhat useful data
+        if (typeof capabilities.api_version !== 'string') {
+            capabilities.api_version = "0.4.0";
+        }
+        if (typeof capabilities.backend_version !== 'string') {
+            capabilities.backend_version = capabilities.api_version;
+        }
+        if (typeof capabilities.title !== 'string') {
+            capabilities.title = title;
+        }
+        if (typeof capabilities.description !== 'string') {
+            capabilities.description = "No description provided.";
+        }
+        if (!Array.isArray(capabilities.endpoints)) {
+            capabilities.endpoints = [];
+        }
+
         return capabilities;
     },
 
@@ -54,8 +70,7 @@ var MigrateCapabilities = {
         var formats = Object.assign({}, originalFormats);
         // convert v0.3 processes to v0.4 format
         if (Utils.compareVersion(version, "0.3.x") === 0) {
-            // ...
-            throw "Not implemented yet";
+            return formats.formats;
         }
         return formats;
     },
@@ -65,8 +80,7 @@ var MigrateCapabilities = {
         var types = Object.assign({}, originalTypes);
         // convert v0.3 processes to v0.4 format
         if (Utils.compareVersion(version, "0.3.x") === 0) {
-            // ...
-            throw "Not implemented yet";
+            // Nothing to do as nothing has changed.
         }
         return types;
     }

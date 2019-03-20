@@ -1,10 +1,31 @@
 const MigrateCollections = require('../src/migrate/collections.js');
 
-var legacyCollection = {
+var legacyMinimalCollection = {
 	"name": "Sentinel-2A",
-	"title": "Sentinel-2A MSI L1C",
 	"description": "...",
 	"license": "proprietary",
+	"extent": {
+		"spatial": [180,-56,-180,83],
+		"temporal": ["2015-06-23T00:00:00Z",null]
+	},
+	"links": []
+};
+
+var expectedMinimalCollection = {
+	"stac_version": "0.6.1",
+	"id": "Sentinel-2A",
+	"description": "...",
+	"license": "proprietary",
+	"extent": {
+		"spatial": [180,-56,-180,83],
+		"temporal": ["2015-06-23T00:00:00Z",null]
+	},
+	"links": [],
+	"properties": {}
+};
+
+var legacyCollection = Object.assign({}, legacyMinimalCollection, {
+	"title": "Sentinel-2A MSI L1C",
 	"keywords": [
 		"copernicus"
 	],
@@ -14,10 +35,6 @@ var legacyCollection = {
 			"url": "https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi"
 		}
 	],
-	"extent": {
-		"spatial": [180,-56,-180,83],
-		"temporal": ["2015-06-23T00:00:00Z",null]
-	},
 	"links": [
 		{
 			"rel": "self",
@@ -44,14 +61,10 @@ var legacyCollection = {
 			"wavelength": 0.4
 		}
 	}
-};
+});
 
-var expectedCollection = {
-	"stac_version": "0.6.1",
-	"id": "Sentinel-2A",
+var expectedCollection = Object.assign({}, expectedMinimalCollection, {
 	"title": "Sentinel-2A MSI L1C",
-	"description": "...",
-	"license": "proprietary",
 	"keywords": [
 		"copernicus"
 	],
@@ -61,10 +74,6 @@ var expectedCollection = {
 			"url": "https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi"
 		}
 	],
-	"extent": {
-		"spatial": [180,-56,-180,83],
-		"temporal": ["2015-06-23T00:00:00Z",null]
-	},
 	"links": [
 		{
 			"rel": "self",
@@ -94,7 +103,7 @@ var expectedCollection = {
 			}
 		]
 	}
-};
+});
 
 describe('Basic Collection Migration Tests', () => {
 	test('Guess Collection Spec Versions', () => {
@@ -104,6 +113,7 @@ describe('Basic Collection Migration Tests', () => {
 	test('Migrate Collection', () => {
 		expect(MigrateCollections.convertCollectionToLatestSpec({})).toEqual({});
 		// Test that a legacy collection gets converted
+		expect(MigrateCollections.convertCollectionToLatestSpec(legacyMinimalCollection)).toEqual(expectedMinimalCollection);
 		expect(MigrateCollections.convertCollectionToLatestSpec(legacyCollection)).toEqual(expectedCollection);
 		expect(MigrateCollections.convertCollectionToLatestSpec(legacyCollection, "0.3.1")).toEqual(expectedCollection);
 		// Test that a collection following the latest spec doesn't change at all

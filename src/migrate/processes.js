@@ -64,7 +64,7 @@ var MigrateProcesses = {
             }
 
             // Fill parameter order
-			if (!Array.isArray(process.parameter_order)) {
+			if (typeof process.parameters === 'object' && !Array.isArray(process.parameter_order)) {
                 var parameter_order = Object.keys(process.parameters);
                 if (parameter_order.length > 1) {
                     process.parameter_order = parameter_order;

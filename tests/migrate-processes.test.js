@@ -49,6 +49,9 @@ var legacyProcess = {
 					"north":48.6
 				}
 			}
+		},
+		"Another example": {
+			"description": "...",
 		}
 	}
 };
@@ -104,9 +107,24 @@ var expectedProcess = {
 					"north":48.6
 				}
 			}
+		},
+		{
+			"title": "Another example",
+			"description": "...",
 		}
 	]
 };
+
+var legacyProcess2 = Object.assign({}, legacyProcess);
+legacyProcess2.parameters = Object.assign({}, legacyProcess.parameters);
+delete legacyProcess2.parameters.extent;
+delete legacyProcess2.examples;
+
+var expectedProcess2 = Object.assign({}, expectedProcess);
+expectedProcess2.parameters = Object.assign({}, expectedProcess.parameters);
+delete expectedProcess2.parameter_order;
+delete expectedProcess2.parameters.extent;
+delete expectedProcess2.examples;
 
 describe('Basic Process Migration Tests', () => {
 	test('Guess Process Spec Versions', () => {
@@ -115,8 +133,10 @@ describe('Basic Process Migration Tests', () => {
 	});
 	test('Migrate Process', () => {
 		expect(MigrateProcesses.convertProcessToLatestSpec({})).toEqual({});
+		expect(MigrateProcesses.convertProcessToLatestSpec({}, "0.3.0")).toEqual({});
 		// Test that a legacy process gets converted
 		expect(MigrateProcesses.convertProcessToLatestSpec(legacyProcess)).toEqual(expectedProcess);
+		expect(MigrateProcesses.convertProcessToLatestSpec(legacyProcess2)).toEqual(expectedProcess2);
 		expect(MigrateProcesses.convertProcessToLatestSpec(legacyProcess, "0.3.1")).toEqual(expectedProcess);
 		// Test that a process following the latest spec doesn't change at all
 		expect(MigrateProcesses.convertProcessToLatestSpec(expectedProcess)).toEqual(expectedProcess);

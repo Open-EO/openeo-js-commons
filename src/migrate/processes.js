@@ -101,7 +101,6 @@ function upgradeParamAndReturn(obj, version) {
         delete param.mime_type;
     }
 
-
     // Set required fields if not valid yet
     if (typeof param.description !== 'string') {
         param.description = "";
@@ -123,15 +122,23 @@ function upgradeParamAndReturn(obj, version) {
         }
 
         // Remove default value from schema, add on parameter-level instead
+        var moveMediaType = (Utils.compareVersion(version, "0.4.x") <= 0 && typeof param.media_type !== 'undefined');
         var schemas = Array.isArray(param.schema) ? param.schema : [param.schema];
         for(var i in schemas) {
             if (typeof schemas[i].default !== 'undefined') {
                 param.default = schemas[i].default;
                 delete schemas[i].default;
             }
+            // v0.3 => v0.4: mime_type => media_type
+            if (moveMediaType) {
+                schemas[i].contentMediaType = param.media_type;
+            }
             renameFormat(schemas[i]);
         }
-        
+        // Remove the media type, has been moved to JSON Schema above.
+        if (moveMediaType) {
+            delete param.media_type;
+        }
     }
 
     return param;

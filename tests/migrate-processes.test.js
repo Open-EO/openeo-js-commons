@@ -195,10 +195,10 @@ var expectedProcess = {
 		"imagery": {
 			"description": "EO data to process.",
 			"required": true,
-			"media_type": "application/data-cube",
 			"schema": {
 				"type": "object",
-				"subtype": "eodata"
+				"subtype": "eodata",
+				"contentMediaType": "application/data-cube"
 			}
 		},
 		"extent": {
@@ -246,10 +246,10 @@ var expectedProcess = {
 	},
 	"returns": {
 		"description": "Processed EO data.",
-		"media_type": "application/data-cube",
 		"schema": {
 			"type": "object",
-			"subtype": "eodata"
+			"subtype": "eodata",
+			"contentMediaType": "application/data-cube"
 		}
 	},
 	"exceptions": {

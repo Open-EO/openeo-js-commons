@@ -1,4 +1,7 @@
-const ajv = require('ajv');
+var ajv;
+try {
+	ajv = require('ajv');
+} catch(err) {}
 const Utils = require('../utils');
 
 module.exports = class JsonSchemaValidator {
@@ -28,6 +31,9 @@ module.exports = class JsonSchemaValidator {
 			format: 'full',
 			unknownFormats: Object.keys(this.typeHints)
 		};
+		if (!ajv) {
+			throw "ajv not installed";
+		}
 		this.ajv = new ajv(ajvOptions);
 		this.ajv.addKeyword('parameters', {
 			dependencies: [

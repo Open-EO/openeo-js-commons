@@ -30,6 +30,10 @@ var legacyProcess03 = {
 					},
 					{
 						"type": "object"
+					},
+					{
+						"type": "string",
+						"format": "uri"
 					}
 				],
 				"default": null
@@ -45,6 +49,10 @@ var legacyProcess03 = {
 					},
 					{
 						"type": "object"
+					},
+					{
+						"type": "string",
+						"format": "uri"
 					}
 				]
 			}
@@ -115,6 +123,10 @@ var legacyProcess04 = {
 					},
 					{
 						"type": "object"
+					},
+					{
+						"type": "string",
+						"format": "uri"
 					}
 				],
 				"default": null
@@ -130,6 +142,10 @@ var legacyProcess04 = {
 					{
 						"type": "object",
 						"default": null
+					},
+					{
+						"type": "string",
+						"format": "uri"
 					}
 				]
 			}
@@ -182,7 +198,7 @@ var expectedProcess = {
 			"media_type": "application/data-cube",
 			"schema": {
 				"type": "object",
-				"format": "eodata"
+				"subtype": "eodata"
 			}
 		},
 		"extent": {
@@ -190,7 +206,7 @@ var expectedProcess = {
 			"required": true,
 			"schema": {
 				"type": "object",
-				"format": "spatial_extent"
+				"subtype": "spatial_extent"
 			}
 		},
 		"crs": {
@@ -201,6 +217,11 @@ var expectedProcess = {
 				},
 				{
 					"type": "object"
+				},
+				{
+					"type": "string",
+					"format": "uri",
+					"subtype": "uri"
 				}
 			],
 			"default": null
@@ -213,6 +234,11 @@ var expectedProcess = {
 				},
 				{
 					"type": "object"
+				},
+				{
+					"type": "string",
+					"format": "uri",
+					"subtype": "uri"
 				}
 			],
 			"default": null
@@ -223,7 +249,7 @@ var expectedProcess = {
 		"media_type": "application/data-cube",
 		"schema": {
 			"type": "object",
-			"format": "eodata"
+			"subtype": "eodata"
 		}
 	},
 	"exceptions": {

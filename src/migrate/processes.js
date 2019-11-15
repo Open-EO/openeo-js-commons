@@ -128,12 +128,27 @@ function upgradeParamAndReturn(obj, version) {
             if (typeof schemas[i].default !== 'undefined') {
                 param.default = schemas[i].default;
                 delete schemas[i].default;
-                break;
             }
+            renameFormat(schemas[i]);
         }
+        
     }
 
     return param;
+}
+
+function renameFormat(schema) {
+    for(var i in schema) {
+        if (i === 'format') {
+            schema.subtype = schema.format;
+            if (!['date-time', 'time', 'date', 'uri'].includes(schema.format)) {
+                delete schema.format;
+            }
+        }
+        else if (schema[i] && typeof schema[i] === 'object') {
+            renameFormat(schema[i]);
+        }
+    }
 }
 
 module.exports = MigrateProcesses;

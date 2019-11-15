@@ -14,10 +14,10 @@ module.exports = class JsonSchemaValidator {
 			'job-id': {type: 'string', validate: 'validateJobId'},
 			'kernel': {type: 'array', validate: 'validateKernel'},
 			'output-format': {type: 'string', validate: 'validateOutputFormat'},
-			'output-format-options': {type: 'array', validate: 'validateOutputFormatOptions'},
+			'output-format-options': {type: 'object', validate: 'validateOutputFormatOptions'},
 			'process-graph-id': {type: 'string', validate: 'validateProcessGraphId'},
-			'process-graph-variables': {type: 'array', validate: 'validateProcessGraphVariables'},
-			'proj-definition': {type: 'string', validate: 'validateProjDefinition'},
+			'process-graph-variables': {type: 'object', validate: 'validateProcessGraphVariables'},
+			'proj-definition': {type: 'string', validate: 'validateProjDefinition'}, // Proj is deprecated. Implement projjson and wkt2 instead
 			'raster-cube': {type: 'object', validate: 'validateRasterCube'},
 			'temporal-interval': {type: 'array', validate: 'validateTemporalInterval'},
 			'temporal-intervals': {type: 'array', validate: 'validateTemporalIntervals'},

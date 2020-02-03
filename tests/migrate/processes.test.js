@@ -1,4 +1,4 @@
-const MigrateProcesses = require('../src/migrate/processes.js');
+const MigrateProcesses = require('../../src/migrate/processes.js');
 
 var legacyProcess03 = {
 	"name": "filter_bbox",

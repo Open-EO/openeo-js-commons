@@ -20,19 +20,4 @@ describe('Utils Tests', () => {
 		expect(Utils.isObject({})).toBe(true); // plain object
 		expect(Utils.isObject(new Test())).toBe(true); // object instance
 	});
-	test('size', () => {
-		expect(Utils.size(null)).toBe(0);
-		expect(Utils.size({})).toBe(0);
-		expect(Utils.size({a: 1, b: 2})).toBe(2);
-		expect(Utils.size({a: 1, b: () => {}})).toBe(2);
-		expect(Utils.size([])).toBe(0);
-		expect(Utils.size([1,2,3])).toBe(3);
-		expect(Utils.size(123)).toBe(0);
-	});
-	test('replacePlaceholders', () => {
-		expect(Utils.replacePlaceholders(null)).toBe(null);
-		expect(Utils.replacePlaceholders("Simpler Test")).toBe("Simpler Test");
-		expect(Utils.replacePlaceholders("Eine Variable: {x}", {x: 123})).toBe("Eine Variable: 123");
-		expect(Utils.replacePlaceholders("{multiple} {vars}: {undefined}", {multiple: "Multiple", vars: "Variables", more: "Unused"})).toBe("Multiple Variables: {undefined}");
-	});
 });

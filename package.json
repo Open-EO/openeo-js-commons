@@ -1,6 +1,6 @@
 {
   "name": "@openeo/js-commons",
-  "version": "0.5.0-alpha.1",
+  "version": "0.5.0-alpha.2",
   "author": "openEO Consortium",
   "contributors": [
     {
@@ -22,9 +22,6 @@
     "dist/*.js",
     "src/*"
   ],
-  "peerDependencies": {
-    "ajv": "^6.10.0"
-  },
   "devDependencies": {
     "@babel/core": "^7.0.0",
     "jest": "^24.8.0",

@@ -1,4 +1,4 @@
-const MigrateCollections = require('../src/migrate/collections.js');
+const MigrateCollections = require('../../src/migrate/collections.js');
 
 var legacyMinimalCollection = {
 	"name": "Sentinel-2A",

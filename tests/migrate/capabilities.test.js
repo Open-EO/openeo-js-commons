@@ -1,4 +1,4 @@
-const MigrateCapabilities = require('../src/migrate/capabilities.js');
+const MigrateCapabilities = require('../../src/migrate/capabilities.js');
 
 var endpoints = [
 	{

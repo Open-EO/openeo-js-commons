@@ -6,13 +6,15 @@ A set of common JavaScript functionalities for [openEO](http://openeo.org).
 This library's version is **0.5.0-alpha.1** and supports **openEO API version 1.0.x**. Legacy versions are available as releases.
 
 ## Features
-- Converting responses to the latest API version is supported for:
+- Converting responses from API version 0.4 to the latest API version is supported for:
     - Capabilities
     - Collections
     - Processes
     - Output Formats
     - Service Types
+    - UDF Runtimes
 - Back-end feature detection
+- Validate, compare and prioritize version numbers (e.g. for well-known discovery)
 
 ## Usage
 

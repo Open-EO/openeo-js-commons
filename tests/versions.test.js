@@ -35,8 +35,8 @@ describe('Versions Tests', () => {
 		expect(Versions.compare("0.3.0", "0.3")).toBe(0);
 		expect(Versions.compare("0.3.x", "0.3.1")).toBe(0);
 		expect(Versions.compare("0.3.1", "0.3")).toBe(1);
-		expect(Versions.compare("0.3", "")).toBeNull();
-		expect(Versions.compare("0.3", null)).toBeNull();
+		expect(() => Versions.compare("0.3", "")).toThrow();
+		expect(() => Versions.compare("0.3", null)).toThrow();
 	});
 	test('findCompatible', () => {
 		expect(Versions.findCompatible([])).toEqual([]);

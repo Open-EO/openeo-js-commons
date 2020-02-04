@@ -1,0 +1,12 @@
+{
+	"api_version": "0.4.1",
+	"endpoints": [
+		{
+			"path": "/output_formats",
+			"methods": [
+				"GET"
+			]
+		}
+	],
+	"links": []
+  }

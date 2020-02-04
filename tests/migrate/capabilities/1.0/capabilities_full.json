@@ -1,0 +1,87 @@
+{
+	"api_version": "1.0.0",
+	"backend_version": "1.1.2",
+	"stac_version": "0.9.0",
+	"id": "unknown",
+	"title": "Cool EO Cloud",
+	"description": "Lorem Ipsum",
+	"endpoints": [
+	  {
+		"path": "/collections",
+		"methods": [
+		  "GET"
+		]
+	  },
+	  {
+		"path": "/collections/{collection_id}",
+		"methods": [
+		  "GET"
+		]
+	  },
+	  {
+		"path": "/processes",
+		"methods": [
+		  "GET"
+		]
+	  },
+	  {
+		  "path": "/file_formats",
+		  "methods": [
+			  "GET"
+		  ]
+	  },
+	  {
+		"path": "/jobs",
+		"methods": [
+		  "GET",
+		  "POST"
+		]
+	  },
+	  {
+		"path": "/jobs/{job_id}",
+		"methods": [
+		  "GET",
+		  "DELETE",
+		  "PATCH"
+		]
+	  }
+	],
+	"billing": {
+	  "currency": "USD",
+	  "default_plan": "free",
+	  "plans": [
+		{
+		  "name": "free",
+		  "description": "Free plan. Calculates one tile per second and a maximum amount of 100 tiles per hour.",
+		  "url": "http://cool-cloud-corp.com/plans/free-plan",
+		  "paid": false
+		},
+		{
+		  "name": "premium",
+		  "description": "Premium plan. Calculates unlimited tiles and each calculated tile costs 0.003 USD.",
+		  "url": "http://cool-cloud-corp.com/plans/premium-plan",
+		  "paid": true
+		}
+	  ]
+	},
+	"links": [
+	  {
+		"href": "http://www.cool-cloud-corp.com",
+		"rel": "about",
+		"type": "text/html",
+		"title": "Homepage of the service provider"
+	  },
+	  {
+		"href": "https://www.cool-cloud-corp.com/tos",
+		"rel": "terms-of-service",
+		"type": "text/html",
+		"title": "Terms of Service"
+	  },
+	  {
+		"href": "http://www.cool-cloud-corp.com/.well-known/openeo",
+		"rel": "version-history",
+		"type": "application/json",
+		"title": "List of supported openEO versions"
+	  }
+	]
+  }

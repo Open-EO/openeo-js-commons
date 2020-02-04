@@ -5,16 +5,12 @@ const semver = /^v?(?:\d+)(\.(?:[x*]|\d+)(\.(?:[x*]|\d+)(\.(?:[x*]|\d+))?(?:-[\d
 class Versions {
 
     static compare(v1, v2, operator = null) {
-        try {
-			if (operator !== null) {
-				return VersionCompare.compare(v1, v2, operator);
-			}
-			else {
-				return VersionCompare(v1, v2);
-			}
-        } catch (error) {
-            return null;
-        }
+		if (operator !== null) {
+			return VersionCompare.compare(v1, v2, operator);
+		}
+		else {
+			return VersionCompare(v1, v2);
+		}
 	}
 
 	// Function or regexp is coming from compare-version, but not exposed so copied it here.
@@ -77,7 +73,7 @@ class Versions {
 	}
 
 	static findLatest(wkVersions, preferProduction = true, minVersion = null, maxVersion = null) {
-		var versions = Versions.findCompatible(wkVersions, preferProduction, minVersion, maxVersion);
+		let versions = Versions.findCompatible(wkVersions, preferProduction, minVersion, maxVersion);
 		if (versions.length > 0) {
 			return versions[0];
 		}
@@ -86,6 +82,6 @@ class Versions {
 		}
 	}
 	
-};
+}
 
 module.exports = Versions;

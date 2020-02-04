@@ -1,276 +1,122 @@
 const MigrateCapabilities = require('../../src/migrate/capabilities.js');
 
-var endpoints = [
-	{
-		"path":"/processes", 
-		"methods":[
-			"GET"
-		]
-	},
-	{
-		"path":"/output_formats", 
-		"methods":[
-			"GET"
-		]
-	}
-];
-
-var freePlan = {
-	"name": "free",
-	"description": "Free plan. Calculates one tile per second and a maximum amount of 100 tiles per hour.",
-	"url": "http://openeo.org/plans/free-plan"
-};
-var businessPlan = {
-	"name": "business",
-	"description": "Premium business plan.",
-	"url": "http://openeo.org/plans/business-plan"
-};
-
-var billing03 = {
-	"currency": "USD",
-	"default_plan": "free",
-	"plans": [freePlan, businessPlan]
-};
-var billing04 = {
-	"currency": "USD",
-	"default_plan": "free",
-	"plans": [
-		Object.assign({}, freePlan, {paid: false}),
-		Object.assign({}, businessPlan, {paid: true}),
-	]
-};
-
-var legacyCapability03 = {
-	"version":"0.3.1", 
-	"endpoints":endpoints,
-	"billing": billing03
-};
-
-var legacyCapability04 = {
-	"api_version":"0.4.1",
-	"endpoints":endpoints,
-	"billing": billing04
-};
-
-var emptyCapability =  {
-	"api_version": "1.0.0",
-	"backend_version": "Unknown",
-	"title": "Unknown",
-	"description": "",
-	"endpoints": [],
-	"links": []
-};
-
-var expectedCapability = Object.assign({}, emptyCapability,  {
-	"endpoints": endpoints,
-	"billing": billing04
-});
-var expectedCapabilityWithOldVersionNumber = Object.assign({}, expectedCapability, {api_version: "0.4.1"});
-
-var invalidCapability =  {
-	"backend_version": "1.0.0",
-	"endpoints":[]
-};
-
-var expectedInvalidCapability = Object.assign({}, emptyCapability, invalidCapability);
-
-var emptyFileFormats = {
-	output: {},
-	input: {}
-};
-
-var legacyOutputFormats04 = {
-	"GTiff": {
-		"gis_data_types":["raster"]
-	}, 
-	"GeoPackage": {
-		"gis_data_types":["raster", "vector"], 
-		"parameters": {
-			"gis_data_type": {
-				"type":"string", 
-				"enum":["raster", "vector"], 
-				"required":true
-			}, 
-			"version": {
-				"type":"string", 
-				"description":"Set GeoPackage version. In AUTO mode, this will be equivalent to 1.2 starting with GDAL 2.3.", 
-				"enum":["auto", "1", "1.1", "1.2"], 
-				"default":"auto"
-			}
-		}
-	}
-};
-
-var expectedFileFormats = {
-	"output": legacyOutputFormats04,
-	"input": {}
-};
-
-var legacyOutputFormats03 =  {
-	"default":"GTiff", 
-	"formats": legacyOutputFormats04
-};
-
-var serviceTypes = {
-	"WMS": {
-		"parameters": {
-			"version": {
-				"type": "string",
-				"description": "The WMS version to use.",
-				"default": "1.3.0",
-				"enum": ["1.1.1","1.3.0"]
-			}
-		},
-		"attributes": {
-			"layers": {
-				"type": "array",
-				"description": "Array of layer names.",
-				"example": ["roads","countries","water_bodies"]
-			}
-		},
-		"variables": [
-			{
-				"variable_id": "layer",
-				"type": "string",
-				"desctiption": "The layer name.",
-				"default": "roads"
-			},
-			{
-				"variable_id": "spetial_extent_west",
-				"type": "number"
-			},
-			{
-				"variable_id": "spetial_extent_east",
-				"type": "number"
-			},
-			{
-				"variable_id": "spetial_extent_north",
-				"type": "number"
-			},
-			{
-				"variable_id": "spetial_extent_south",
-				"type": "number"
-			}
-		],
-		"links": [
-			{
-				"href": "https://www.opengeospatial.org/standards/wms",
-				"rel": "about",
-				"title": "OGC Web Map Service Standard"
-			}
-		]
-	}
-};
-
-var udfRuntimes = {
-	"PHP7": {
-	  "description": "Just an example how to reference a docker image.",
-	  "docker": "openeo/udf-php7",
-	  "default": "latest",
-	  "tags": [
-		"latest",
-		"7.3.1"
-	  ],
-	  "links": [
-		{
-		  "href": "https://hub.docker.com/openeo/udf-php7/",
-		  "rel": "about"
-		}
-	  ]
-	},
-	"R": {
-	  "description": "R programming language with Rcpp and rmarkdown.",
-	  "default": "3.5.2",
-	  "versions": {
-		"3.1.0": {
-		  "libraries": {
-			"Rcpp": {
-			  "version": "1.0.10",
-			  "links": [
-				{
-				  "href": "https://cran.r-project.org/web/packages/Rcpp/index.html",
-				  "rel": "about"
-				}
-			  ]
-			}
-		  }
-		}
-	  }
-	}
-  };
-
 describe('Basic Capabilities Migration Tests', () =>  {
+	const c04min = require('./capabilities/0.4/capabilities_min.json');
+	const c04full = require('./capabilities/0.4/capabilities_full.json');
+	const c10minKeep = require('./capabilities/1.0/capabilities_min_keep_values.json');
+	const c10minUpdate = require('./capabilities/1.0/capabilities_min_update_values.json');
+	const c10empty = require('./capabilities/1.0/capabilities_empty.json');
+	const c10full = require('./capabilities/1.0/capabilities_full.json');
+
+	const ep04 = require('./capabilities/0.4/endpoints.json');
+	const ep10 = require('./capabilities/1.0/endpoints.json');
+
 	test('Guess Api Versions', () =>  {
-		expect(MigrateCapabilities.guessApiVersion({})).toBe("0.3");
-		expect(MigrateCapabilities.guessApiVersion({endpoints: endpoints})).toBe("0.4");
-		expect(MigrateCapabilities.guessApiVersion({title: "openEO"})).toBe("1.0");
-		expect(MigrateCapabilities.guessApiVersion(legacyCapability03)).toBe("0.3.1");
-		expect(MigrateCapabilities.guessApiVersion(legacyCapability04)).toBe("0.4.1");
-		expect(MigrateCapabilities.guessApiVersion(emptyCapability)).toBe("1.0.0");
-	}); 
+		expect(MigrateCapabilities.guessApiVersion(null)).toBe("0.0.0");
+		expect(MigrateCapabilities.guessApiVersion({})).toBe("0.0.0");
+		expect(MigrateCapabilities.guessApiVersion({title: "openEO", endpoints: []})).toBe("0.0.0");
+		expect(MigrateCapabilities.guessApiVersion({api_version: "foo"})).toBe("0.0.0");
+		expect(MigrateCapabilities.guessApiVersion({endpoints: []})).toBe("0.3.1");
+		expect(MigrateCapabilities.guessApiVersion({endpoints: ep04})).toBe("0.4.2");
+		expect(MigrateCapabilities.guessApiVersion({endpoints: ep10})).toBe("1.0.0");
+		expect(MigrateCapabilities.guessApiVersion({version: '0.3.1', endpoints: []})).toBe("0.3.1");
+		expect(MigrateCapabilities.guessApiVersion(c04min)).toBe("0.4.1");
+		expect(MigrateCapabilities.guessApiVersion(c04full)).toBe("0.4.2");
+		expect(MigrateCapabilities.guessApiVersion(c10minUpdate)).toBe("1.0.0");
+	});
+-
 	test('Migrate Capabilities', () =>  {
-		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec({})).toEqual(emptyCapability);
-		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(invalidCapability)).toEqual(expectedInvalidCapability); 
-		// Test that legacy capabilities get converted
-		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(legacyCapability03)).toEqual(expectedCapability);
-		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(legacyCapability03, "0.3.1")).toEqual(expectedCapability);
-		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(legacyCapability04)).toEqual(expectedCapability);
-		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(legacyCapability04, null, false)).toEqual(expectedCapabilityWithOldVersionNumber);
-		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(legacyCapability04, "0.4.0")).toEqual(expectedCapability); 
+		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec({})).toEqual({});
+		expect(() => MigrateCapabilities.convertCapabilitiesToLatestSpec({}, "0.3.2")).toThrow();
+		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec({}, "0.4.1")).toEqual(c10empty);
+		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec({}, "1.0.0")).toEqual(c10empty);
+		// Handle invalid version numbers
+		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec({api_version: "foo"}, null, false)).toEqual({});
+		// Test that 0.4 capabilities get converted without setting defaults
+		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(c04full)).toEqual(c10full);
+		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(c04full, "0.4.2")).toEqual(c10full);
+		// Test that 0.4 capabilities get converted with setting defaults
+		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(c04min, null, true, true, id = "test", title = "Test API", backend_version = "0.1.0")).toEqual(c10minUpdate);
+		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(c04min, null, false, false, id = "test", title = "Test API", backend_version = "0.1.0")).toEqual(c10minKeep);
+		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(c04min, "0.4.1", false, false, id = "test", title = "Test API", backend_version = "0.1.0")).toEqual(c10minKeep);
 		// Test that capabilities following the latest spec doesn't change at all
-		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(expectedCapability)).toEqual(expectedCapability);
-		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(expectedCapability, "1.0.0")).toEqual(expectedCapability);
+		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(c10full)).toEqual(c10full);
+		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(c10full, "1.0.0")).toEqual(c10full);
 	});
+
 	test('Migrate Billing Info', () => {
-		expect(MigrateCapabilities.convertBillingToLatestSpec(1, "0.3.0")).toEqual({});
-		expect(MigrateCapabilities.convertBillingToLatestSpec({}, "0.3.0")).toEqual({});
-		expect(MigrateCapabilities.convertBillingToLatestSpec({}, "1.0.0")).toEqual({});
-		// Test that legacy endpoints get converted
-		expect(MigrateCapabilities.convertBillingToLatestSpec(legacyCapability03.billing, "0.3.1")).toEqual(expectedCapability.billing);
-		expect(MigrateCapabilities.convertBillingToLatestSpec(legacyCapability04.billing, "0.4.0")).toEqual(expectedCapability.billing); 
+		expect(() => MigrateCapabilities.convertBillingToLatestSpec({})).toThrow();
+		expect(() => MigrateCapabilities.convertBillingToLatestSpec({}, "0.3.2")).toThrow();
+		expect(MigrateCapabilities.convertBillingToLatestSpec(null, "0.4.0")).toEqual({currency: null});
+		expect(MigrateCapabilities.convertBillingToLatestSpec({}, "0.4.0")).toEqual({currency: null});
+		expect(MigrateCapabilities.convertBillingToLatestSpec({}, "1.0.0")).toEqual({currency: null});
+		// Test that 0.4 data gets converted
+		expect(MigrateCapabilities.convertBillingToLatestSpec(c04full.billing, "0.4.0")).toEqual(c10full.billing); 
 		// Test that endpoints following the latest spec doesn't change at all
-		expect(MigrateCapabilities.convertBillingToLatestSpec(expectedCapability.billing, "1.0.0")).toEqual(expectedCapability.billing); 
+		expect(MigrateCapabilities.convertBillingToLatestSpec(c04full.billing, "1.0.0")).toEqual(c10full.billing); 
 	});
+
 	test('Migrate Endpoints', () => {
-		expect(MigrateCapabilities.convertEndpointsToLatestSpec(1, "0.3.0")).toEqual([]);
-		expect(MigrateCapabilities.convertEndpointsToLatestSpec([], "0.3.0")).toEqual([]);
+		expect(() => MigrateCapabilities.convertEndpointsToLatestSpec([])).toThrow();
+		expect(() => MigrateCapabilities.convertEndpointsToLatestSpec([], "0.3.2")).toThrow();
+		expect(MigrateCapabilities.convertEndpointsToLatestSpec([], "0.4.0")).toEqual([]);
 		expect(MigrateCapabilities.convertEndpointsToLatestSpec([], "1.0.0")).toEqual([]);
-		// Test that legacy endpoints get converted
-		expect(MigrateCapabilities.convertEndpointsToLatestSpec(legacyCapability03.endpoints, "0.3.1")).toEqual(expectedCapability.endpoints);
-		expect(MigrateCapabilities.convertEndpointsToLatestSpec(legacyCapability04.endpoints, "0.4.0")).toEqual(expectedCapability.endpoints); 
+		// Test that 0.4 data gets converted
+		expect(MigrateCapabilities.convertEndpointsToLatestSpec(ep04, "0.4.0", true)).toEqual(ep10);
+		expect(MigrateCapabilities.convertEndpointsToLatestSpec(c04min.endpoints, "0.4.0", false)).toEqual(c10minKeep.endpoints);
+		expect(MigrateCapabilities.convertEndpointsToLatestSpec(c04min.endpoints, "0.4.0", true)).toEqual(c10minUpdate.endpoints);
 		// Test that endpoints following the latest spec doesn't change at all
-		expect(MigrateCapabilities.convertEndpointsToLatestSpec(expectedCapability.endpoints, "1.0.0")).toEqual(expectedCapability.endpoints); 
+		expect(MigrateCapabilities.convertEndpointsToLatestSpec(ep10, "1.0.0", true)).toEqual(ep10);
+		expect(MigrateCapabilities.convertEndpointsToLatestSpec(c04min.endpoints, "1.0.0")).toEqual(c10minKeep.endpoints);
 	});
+
+	const ff04 = require('./capabilities/0.4/file_formats.json');
+	const ff10 = require('./capabilities/1.0/file_formats.json');
+	const ff10_empty = require('./capabilities/1.0/file_formats_empty.json');
 	test('Migrate File Formats', () => {
-		expect(MigrateCapabilities.convertFileFormatsToLatestSpec(1, "0.3.0")).toEqual(emptyFileFormats);
-		expect(MigrateCapabilities.convertFileFormatsToLatestSpec({}, "0.3.0")).toEqual(emptyFileFormats);
-		expect(MigrateCapabilities.convertFileFormatsToLatestSpec({}, "1.0.0")).toEqual(emptyFileFormats);
-		// Check the legacy alias convertOutputFormatsToLatestSpec
-		expect(MigrateCapabilities.convertOutputFormatsToLatestSpec({}, "0.4.0")).toEqual(emptyFileFormats);
-		// Test that legacy output formats get converted
-		expect(MigrateCapabilities.convertFileFormatsToLatestSpec(legacyOutputFormats03, "0.3.1")).toEqual(expectedFileFormats);
-		expect(MigrateCapabilities.convertFileFormatsToLatestSpec(legacyOutputFormats04, "0.4.0")).toEqual(expectedFileFormats); 
-		// Test that output formats following the latest spec doesn't change at all
-		expect(MigrateCapabilities.convertFileFormatsToLatestSpec(expectedFileFormats, "1.0.0")).toEqual(expectedFileFormats); 
+		expect(() => MigrateCapabilities.convertFileFormatsToLatestSpec({})).toThrow();
+		expect(() => MigrateCapabilities.convertFileFormatsToLatestSpec({}, "0.3.2")).toThrow();
+		expect(MigrateCapabilities.convertFileFormatsToLatestSpec({}, "0.4.0")).toEqual(ff10_empty);
+		expect(MigrateCapabilities.convertFileFormatsToLatestSpec({}, "1.0.0")).toEqual(ff10_empty);
+		// Test that 0.4 service types gets converted
+		expect(MigrateCapabilities.convertFileFormatsToLatestSpec(ff04, "0.4.0")).toEqual(ff10);
+		// Test that service types following the latest spec doesn't change at all
+		expect(MigrateCapabilities.convertFileFormatsToLatestSpec(ff10, "1.0.0")).toEqual(ff10);
+
+		// Check old output_formats alias
+		expect(MigrateCapabilities.convertOutputFormatsToLatestSpec({}, "0.4.0")).toEqual(ff10_empty);
+		expect(MigrateCapabilities.convertOutputFormatsToLatestSpec({}, "1.0.0")).toEqual(ff10_empty);
+		expect(MigrateCapabilities.convertOutputFormatsToLatestSpec(ff04, "0.4.0")).toEqual(ff10);
+		expect(MigrateCapabilities.convertOutputFormatsToLatestSpec(ff10, "1.0.0")).toEqual(ff10);
 	});
+
+	const st04 = require('./capabilities/0.4/service_types.json');
+	const st10 = require('./capabilities/1.0/service_types.json');
 	test('Migrate Service Types', () =>  {
-		expect(MigrateCapabilities.convertServiceTypesToLatestSpec(1, "0.3.0")).toEqual({});
-		expect(MigrateCapabilities.convertServiceTypesToLatestSpec({}, "0.3.0")).toEqual({});
+		expect(() => MigrateCapabilities.convertServiceTypesToLatestSpec({})).toThrow();
+		expect(() => MigrateCapabilities.convertServiceTypesToLatestSpec({}, "0.3.2")).toThrow();
+		expect(MigrateCapabilities.convertServiceTypesToLatestSpec({}, "0.4.0")).toEqual({});
 		expect(MigrateCapabilities.convertServiceTypesToLatestSpec({}, "1.0.0")).toEqual({});
-		// Test that legacy service types gets converted
-		expect(MigrateCapabilities.convertServiceTypesToLatestSpec(serviceTypes, "0.3.1")).toEqual(serviceTypes); // Nothing has changed, don't change anything
-		expect(MigrateCapabilities.convertServiceTypesToLatestSpec(serviceTypes, "0.4.0")).toEqual(serviceTypes); // Nothing has changed, don't change anything
+		// Handle invalid service types
+		expect(MigrateCapabilities.convertServiceTypesToLatestSpec({OGC: null}, "0.4.0")).toEqual({OGC: {}});
+		// Test that 0.4 service types gets converted
+		expect(MigrateCapabilities.convertServiceTypesToLatestSpec(st04, "0.4.0")).toEqual(st10);
 		// Test that service types following the latest spec doesn't change at all
-		expect(MigrateCapabilities.convertServiceTypesToLatestSpec(serviceTypes, "1.0.0")).toEqual(serviceTypes);
+		expect(MigrateCapabilities.convertServiceTypesToLatestSpec(st10, "1.0.0")).toEqual(st10);
 	});
+
+	const udf04 = require('./capabilities/0.4/udf_runtimes.json');
+	const udf10 = require('./capabilities/1.0/udf_runtimes.json');
 	test('Migrate UDF Runtimes', () =>  {
-		expect(MigrateCapabilities.convertUdfRuntimesToLatestSpec(1, "0.3.0")).toEqual({});
-		expect(MigrateCapabilities.convertUdfRuntimesToLatestSpec({}, "0.3.0")).toEqual({});
+		expect(() => MigrateCapabilities.convertUdfRuntimesToLatestSpec({})).toThrow();
+		expect(() => MigrateCapabilities.convertUdfRuntimesToLatestSpec({}, "0.3.2")).toThrow();
+		expect(MigrateCapabilities.convertUdfRuntimesToLatestSpec({}, "0.4.0")).toEqual({});
 		expect(MigrateCapabilities.convertUdfRuntimesToLatestSpec({}, "1.0.0")).toEqual({});
-		// Test that legacy service types gets converted
-		expect(MigrateCapabilities.convertUdfRuntimesToLatestSpec(udfRuntimes, "0.3.1")).toEqual(udfRuntimes); // Nothing has changed, don't change anything
-		expect(MigrateCapabilities.convertUdfRuntimesToLatestSpec(udfRuntimes, "0.4.0")).toEqual(udfRuntimes); // Nothing has changed, don't change anything
-		// Test that service types following the latest spec doesn't change at all
-		expect(MigrateCapabilities.convertUdfRuntimesToLatestSpec(udfRuntimes, "1.0.0")).toEqual(udfRuntimes);
+		// Handle invalid runtimes
+		expect(MigrateCapabilities.convertUdfRuntimesToLatestSpec({brainfuck: null}, "0.4.0")).toEqual({});
+		// Test that 0.4 UDF runtimes gets converted
+		expect(MigrateCapabilities.convertUdfRuntimesToLatestSpec(udf04, "0.4.0")).toEqual(udf10);
+		// Test that UDF runtimes following the latest spec doesn't change at all
+		expect(MigrateCapabilities.convertUdfRuntimesToLatestSpec(udf10, "1.0.0")).toEqual(udf10);
 	});
 });

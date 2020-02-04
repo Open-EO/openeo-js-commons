@@ -1,4 +1,4 @@
-const Utils = require('../utils.js');
+const Versions = require('../versions.js');
 
 var MigrateCollections = {
 
@@ -7,7 +7,7 @@ var MigrateCollections = {
         if (!version || typeof version !== 'string') {
             throw new Error("No version specified");
         }
-        if (Utils.compareVersion(version, "0.5.x") >= 0) {
+        if (Versions.compare(version, "0.5.x") >= 0) {
             throw "Migrating collections from API version 0.4.0 is not supported yet";
         }
         var collection = Object.assign({}, originalCollection);
@@ -15,7 +15,7 @@ var MigrateCollections = {
             return collection;
         }
         // convert v0.3 processes to v0.4 format
-        if (Utils.compareVersion(version, "0.3.x") === 0) {
+        if (Versions.compare(version, "0.3.x") === 0) {
             // name => id
             collection.id = collection.name;
             delete collection.name;

@@ -1,4 +1,5 @@
 const Utils = require('../utils.js');
+const Versions = require('../versions.js');
 
 var MigrateProcesses = {
 
@@ -11,7 +12,7 @@ var MigrateProcesses = {
         // Make sure we don't alter the original object
         var process = Object.assign({}, originalProcess);
 
-        let isVersion03 = Utils.compareVersion(version, "0.3.x") === 0;
+        let isVersion03 = Versions.compare(version, "0.3.x") === 0;
         // name => id
         if (isVersion03) {
             process.id = process.name;
@@ -96,7 +97,7 @@ function upgradeParamAndReturn(obj, version) {
     var param = Object.assign({}, obj);
 
     // v0.3 => v0.4: mime_type => media_type
-    if (Utils.compareVersion(version, "0.3.x") === 0 && typeof param.mime_type !== 'undefined') {
+    if (Versions.compare(version, "0.3.x") === 0 && typeof param.mime_type !== 'undefined') {
         param.media_type = param.mime_type;
         delete param.mime_type;
     }
@@ -109,7 +110,7 @@ function upgradeParamAndReturn(obj, version) {
         param.schema = {};
     }
 
-    if (Utils.compareVersion(version, "0.4.x") <= 0) {
+    if (Versions.compare(version, "0.4.x") <= 0) {
         // Remove anyOf/oneOf wrapper
         for(var type in {anyOf: null, oneOf: null}) {
             if (Array.isArray(param.schema[type])) {
@@ -122,7 +123,7 @@ function upgradeParamAndReturn(obj, version) {
         }
 
         // Remove default value from schema, add on parameter-level instead
-        var moveMediaType = (Utils.compareVersion(version, "0.4.x") <= 0 && typeof param.media_type !== 'undefined');
+        var moveMediaType = (Versions.compare(version, "0.4.x") <= 0 && typeof param.media_type !== 'undefined');
         var schemas = Array.isArray(param.schema) ? param.schema : [param.schema];
         for(var i in schemas) {
             if (typeof schemas[i].default !== 'undefined') {

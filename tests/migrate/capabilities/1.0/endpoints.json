@@ -1,0 +1,29 @@
+[
+	{
+		"path":"/processes",
+		"methods":[
+			"GET"
+		]
+	},
+	{
+		"path":"/file_formats",
+		"methods":[
+			"GET"
+		]
+	},
+	{
+		"path":"/files/{path}",
+		"methods":[
+			"GET",
+			"PUT",
+			"DELETE"
+		]
+	},
+	{
+		"path":"/files",
+		"methods":[
+			"GET",
+			"POST"
+		]
+	}
+]

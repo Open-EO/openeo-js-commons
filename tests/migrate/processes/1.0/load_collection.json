@@ -1,0 +1,208 @@
+{
+    "id": "load_collection",
+    "summary": "Load a collection",
+    "description": "Loads a collection from the current back-end by its id and returns it as processable data cube..",
+    "categories": [
+        "cubes",
+        "import"
+    ],
+    "parameters": [
+        {
+            "name": "id",
+            "description": "The collection id.",
+            "schema": {
+                "type": "string",
+                "subtype": "collection-id",
+                "pattern": "^[A-Za-z0-9_\\-\\.~/]+$"
+            }
+        },
+        {
+            "name": "spatial_extent",
+            "description": "Limits the data to load from the collection to the specified bounding box or polygons.",
+            "schema": [
+                {
+                    "title": "Bounding Box",
+                    "type": "object",
+                    "subtype": "bounding-box",
+                    "required": ["west", "south", "east", "north"],
+                    "properties": {
+                        "west": {
+                            "description": "West (lower left corner, coordinate axis 1).",
+                            "type": "number"
+                        },
+                        "south": {
+                            "description": "South (lower left corner, coordinate axis 2).",
+                            "type": "number"
+                        },
+                        "east": {
+                            "description": "East (upper right corner, coordinate axis 1).",
+                            "type": "number"
+                        },
+                        "north": {
+                            "description": "North (upper right corner, coordinate axis 2).",
+                            "type": "number"
+                        },
+                        "base": {
+                            "description": "Base (optional, lower left corner, coordinate axis 3).",
+                             "type": ["number", "null"],
+                            "default": null
+                        },
+                        "height": {
+                            "description": "Height (optional, upper right corner, coordinate axis 3).",
+			                "type": ["number", "null"],
+                            "default": null
+                        },
+                        "crs": {
+                            "description": "Coordinate reference system of the extent.",
+                            "anyOf": [
+                                {
+                                    "title": "EPSG Code",
+                                    "type": "integer",
+                                    "subtype": "epsg-code",
+                                    "examples": [7099]
+                                },
+                                {
+                                    "title": "PROJ definition",
+                                    "type": "string",
+                                    "subtype": "proj-definition",
+                                    "deprecated": true
+                                }
+                            ],
+                            "default": 4326
+                        }
+                    }
+                },
+                {
+                    "title": "GeoJSON Polygon(s)",
+                    "type": "object",
+                    "subtype": "geojson"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        {
+            "name": "temporal_extent",
+            "description": "Limits the data to load from the collection to the specified left-closed temporal interval.",
+            "schema": [
+                {
+                    "type": "array",
+                    "subtype": "temporal-interval",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date-time",
+                                "subtype": "date-time"
+                            },
+                            {
+                                "type": "string",
+                                "format": "date",
+                                "subtype": "date"
+                            },
+                            {
+                                "type": "string",
+                                "format": "time",
+                                "subtype": "time"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "examples": [
+                        ["2015-01-01", "2016-01-01"],
+                        ["12:00:00Z", "24:00:00Z"]
+                    ]
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        {
+            "name": "bands",
+            "description": "Only adds the specified bands into the data cube so that bands that don't match the list of band names are not available.",
+            "schema": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "subtype": "band-name"
+                    }
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "default": null,
+            "optional": true
+        },
+        {
+            "name": "properties",
+            "description": "Limits the data by metadata properties to include only data in the data cube which all given expressions return `true` for (AND operation).",
+            "experimental": true,
+            "schema": [
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "subtype": "process-graph",
+                        "parameters": [
+                            {
+                                "name": "value",
+                                "description": "The property value. Any data type could be passed.",
+                                "schema": {
+                                    "description": "The property value. Any data type could be passed."
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "default": null,
+            "optional": true
+        }
+    ],
+    "returns": {
+        "description": "A data cube for further processing.",
+        "schema": [
+            {
+                "type": "object",
+                "subtype": "raster-cube"
+            },
+            {
+                "type": "object",
+                "subtype": "vector-cube"
+            }
+        ]
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "https://proj4.org/usage/projections.html",
+            "title": "PROJ parameters for cartographic projections"
+        },
+        {
+            "rel": "about",
+            "href": "http://www.epsg-registry.org",
+            "title": "Official EPSG code registry"
+        },
+        {
+            "rel": "about",
+            "href": "http://www.epsg.io",
+            "title": "Unofficial EPSG code database"
+        },
+        {
+            "href": "http://www.opengeospatial.org/standards/sfa",
+            "rel": "about",
+            "title": "Simple Features standard by the OGC"
+        }
+    ]
+}

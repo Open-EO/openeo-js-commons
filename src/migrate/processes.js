@@ -1,27 +1,52 @@
 const Utils = require('../utils.js');
 const Versions = require('../versions.js');
 
-var MigrateProcesses = {
+class MigrateProcesses {
 
     // Always returns a copy of the input process object
-    convertProcessToLatestSpec(originalProcess, version) {
-        if (!version || typeof version !== 'string') {
-            throw new Error("No version specified");
+    static convertProcessToLatestSpec(originalProcess, version) {
+        if (Versions.compare(version, "0.3.x", "<=")) {
+            throw "Migrating from API version 0.3.0 and older is not supported.";
         }
 
         // Make sure we don't alter the original object
-        var process = Object.assign({}, originalProcess);
+        let process = Utils.deepClone(originalProcess);
 
-        let isVersion03 = Versions.compare(version, "0.3.x") === 0;
-        // name => id
-        if (isVersion03) {
-            process.id = process.name;
-            delete process.name;
-        }
-
-        // If process has no id => seems to be an invalid process, abort
+        // If process has no id => seems to be an invalid process => abort
         if (typeof process.id !== 'string' || process.id.length === 0) {
             return {};
+        }
+
+        // Convert the parameters from object to array
+        if (Versions.compare(version, "0.4.x", "=")) {
+            // Determine the parameter order
+            if (!Array.isArray(process.parameter_order) || process.parameter_order.length === 0) {
+                process.parameter_order = [];
+                for(let param in process.parameters) {
+                    process.parameter_order.push(param);
+                }
+            }
+    
+            // Upgrade parameters and convert from array to object
+            let params = [];
+            for(let name of process.parameter_order) {
+                // Add name 
+                let obj = {name: name};
+                if (Utils.isObject(process.parameters[name])) {
+                    Object.assign(obj, process.parameters[name]);
+                }
+
+                // Migrate from required to optional
+                if (!obj.required) {
+                    obj.optional = true;
+                }
+                delete obj.required;
+
+                // Add to list of ordered params
+                params.push(obj);
+            }
+            delete process.parameter_order;
+            process.parameters = params;
         }
 
         // Set required field description if not a string
@@ -29,134 +54,125 @@ var MigrateProcesses = {
             process.description = "";
         }
 
-        // Parameters
-        if (Utils.isObject(process.parameters)) {
-            for(var key in process.parameters) {
-                process.parameters[key] = upgradeParamAndReturn(process.parameters[key], version);
+        // Update parameters
+        if (Array.isArray(process.parameters)) {
+            for(let i in process.parameters) {
+                let param = process.parameters[i];
+                if (!Utils.isObject(param)) {
+                    continue;
+                }
+
+                // Set required field description if not a string
+                if (typeof param.description !== 'string') {
+                    param.description = "";
+                }
+
+                // Upgrade parameter schema
+                process.parameters[i] = upgradeSchema(param, version);
             }
         }
         else {
-            process.parameters = {};
+            process.parameters = [];
         }
 
-        // Return value
-        process.returns = upgradeParamAndReturn(process.returns, version);
-
-        if (isVersion03) {
-            // exception object
-            if (Utils.isObject(process.exceptions)) {
-                for(let key in process.exceptions) {
-                    var e = process.exceptions[key];
-                    if (typeof e.message === 'undefined') {
-                        process.exceptions[key] = Object.assign({}, e, {
-                            message: e.description
-                        });
-                    }
-                }
-            }
-            // examples object
-            if (Utils.isObject(process.examples)) {
-                var examples = [];
-                for(let key in process.examples) {
-                    var old = process.examples[key];
-                    var example = {
-                        title: old.summary || key,
-                        description: old.description
-                    };
-                    if (old.process_graph) {
-                        example.process_graph = old.process_graph;
-                    }
-                    examples.push(example);
-                }
-                process.examples = examples;
-            }
-
-            // Fill parameter order
-            if (typeof process.parameters === 'object' && !Array.isArray(process.parameter_order)) {
-                var parameter_order = Object.keys(process.parameters);
-                if (parameter_order.length > 1) {
-                    process.parameter_order = parameter_order;
-                }
-            }
+        // Update return value
+        if (!Utils.isObject(process.returns)) {
+            process.returns = {};
         }
+        process.returns = upgradeSchema(process.returns, version, false);
 
         return process;
     }
 
-};
+}
     
-function upgradeParamAndReturn(obj, version) {
-    // Not an object => return minimum required fields
-    if (!Utils.isObject(obj)) {
-        return {
-            description: "",
-            schema: {}
-        };
+function upgradeSchema(obj, version, isParam = true) {
+    var schema = {};
+    if (obj.schema && typeof obj.schema === 'object') { // array or object?
+        schema = obj.schema;
     }
 
-    var param = Object.assign({}, obj);
-
-    // v0.3 => v0.4: mime_type => media_type
-    if (Versions.compare(version, "0.3.x") === 0 && typeof param.mime_type !== 'undefined') {
-        param.media_type = param.mime_type;
-        delete param.mime_type;
-    }
-
-    // Set required fields if not valid yet
-    if (typeof param.description !== 'string') {
-        param.description = "";
-    }
-    if (typeof param.schema !== 'object' || !param.schema) {
-        param.schema = {};
-    }
-
-    if (Versions.compare(version, "0.4.x") <= 0) {
+    if (Versions.compare(version, "0.4.x", "=")) {
         // Remove anyOf/oneOf wrapper
-        for(var type in {anyOf: null, oneOf: null}) {
-            if (Array.isArray(param.schema[type])) {
-                if (typeof param.schema.default !== 'undefined') {
-                    param.default = param.schema.default;
+        for(let type of ['anyOf', 'oneOf']) {
+            if (Array.isArray(schema[type])) {
+                // Parameters only: Move default value to parameter-level
+                if (isParam && typeof schema.default !== 'undefined') {
+                    obj.default = schema.default;
                 }
-                param.schema = param.schema[type];
+                // Move array one level up, removing anyOf and oneOf
+                schema = schema[type];
                 break;
             }
         }
 
-        // Remove default value from schema, add on parameter-level instead
-        var moveMediaType = (Versions.compare(version, "0.4.x") <= 0 && typeof param.media_type !== 'undefined');
-        var schemas = Array.isArray(param.schema) ? param.schema : [param.schema];
-        for(var i in schemas) {
-            if (typeof schemas[i].default !== 'undefined') {
-                param.default = schemas[i].default;
-                delete schemas[i].default;
+        let moveMediaType = (Versions.compare(version, "0.4.x") <= 0 && typeof obj.media_type !== 'undefined');
+        let schemas = Array.isArray(schema) ? schema : [schema];
+        for(let subSchema of schemas) {
+            // Rename format to subtype recursively
+            subSchema = renameFormat(subSchema);
+
+            // Parameters only: Move default value to parameter-level
+            if (isParam && typeof subSchema.default !== 'undefined') {
+                obj.default = subSchema.default;
+                delete subSchema.default;
             }
-            // v0.3 => v0.4: mime_type => media_type
+
+            // Replace media_type field with contentMediaType from JSON Schemas
             if (moveMediaType) {
-                schemas[i].contentMediaType = param.media_type;
+                subSchema.contentMediaType = obj.media_type;
             }
-            renameFormat(schemas[i]);
         }
-        // Remove the media type, has been moved to JSON Schema above.
+
+        // Remove the media type
         if (moveMediaType) {
-            delete param.media_type;
+            delete obj.media_type;
         }
     }
 
-    return param;
+    obj.schema = schema;
+    return obj;
 }
 
 function renameFormat(schema) {
-    for(var i in schema) {
-        if (i === 'format') {
-            schema.subtype = schema.format;
-            if (!['date-time', 'time', 'date', 'uri'].includes(schema.format)) {
-                delete schema.format;
-            }
+    if (Utils.isObject(schema) && typeof schema.type !== 'undefined' && typeof schema.format === 'string') {
+        switch(schema.format) {
+            case 'url':
+                schema.format = 'uri';
+                break;
+            case 'proj-definition':
+                schema.deprecated = true;
+                break;
+            case 'callback':
+                schema.format = 'process-graph';
+                if (Utils.isObject(schema.parameters)) {
+                    let params = [];
+                    for(let name in schema.parameters) {
+                        let paramSchema = schema.parameters[name];
+                        let param = {
+                            name: name,
+                            description: typeof paramSchema.description === 'string' ? paramSchema.description : "",
+                            schema: paramSchema
+                        };
+                        params.push(param);
+                    }
+                    schema.parameters = params;
+                }
+                break;
         }
-        else if (schema[i] && typeof schema[i] === 'object') {
-            renameFormat(schema[i]);
+
+        schema.subtype = schema.format;
+        // Leave format for "well-known" formats defined in JSON Schema
+        if (!['date-time', 'time', 'date', 'uri'].includes(schema.format)) {
+            delete schema.format;
         }
     }
+    for(let i in schema) {
+        if (schema[i] && typeof schema[i] === 'object') {
+            schema[i] = renameFormat(schema[i]);
+        }
+    }
+    return schema;
 }
 
 module.exports = MigrateProcesses;

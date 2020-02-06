@@ -1,0 +1,16 @@
+{
+	"stac_version":"0.9.0",
+	"stac_extensions": [
+		"datacube"
+	],
+	"id":"stac",
+	"description":"",
+	"license":"proprietary",
+	"extent":{
+		"spatial":{},
+		"temporal":{}
+	},
+	"links":[],
+	"cube:dimensions":{},
+	"summaries":{}
+}

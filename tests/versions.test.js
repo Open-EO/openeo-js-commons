@@ -37,6 +37,18 @@ describe('Versions Tests', () => {
 		expect(Versions.compare("0.3.1", "0.3")).toBe(1);
 		expect(() => Versions.compare("0.3", "")).toThrow();
 		expect(() => Versions.compare("0.3", null)).toThrow();
+		expect(Versions.compare("0.9.0-rc1", "0.9.0-rc2")).toBe(-1);
+		expect(Versions.compare("0.9.0-rc.1", "0.9.0-rc.2")).toBe(-1);
+	});
+	test('compare with operator', () => {
+		expect(Versions.compare("0.3.x", "0.3", "=")).toBe(true);
+		expect(Versions.compare("0.3.x", "0.4", "<")).toBe(true);
+		expect(Versions.compare("0.3.0", "0.3", "=")).toBe(true);
+		expect(Versions.compare("0.3.x", "0.3.1", "=")).toBe(true);
+		expect(Versions.compare("0.3.1", "0.3", ">")).toBe(true);
+		expect(() => Versions.compare("0.3", "")).toThrow();
+		expect(() => Versions.compare("0.3", null)).toThrow();
+		expect(() => Versions.compare("0.3", "0.3", "")).toThrow();
 	});
 	test('findCompatible', () => {
 		expect(Versions.findCompatible([])).toEqual([]);

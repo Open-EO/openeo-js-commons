@@ -166,7 +166,10 @@ class MigrateCapabilities {
         if (Versions.compare(version, "0.3.x", "<=")) {
             throw "Migrating from API version 0.3.0 and older is not supported.";
         }
-        let formats = Utils.deepClone(originalFormats);
+        let formats = {};
+        if (Utils.isObject(originalFormats)) {
+            formats = Utils.deepClone(originalFormats);
+        }
 
         if (Versions.compare(version, "0.4.x", "=") && Utils.isObject(formats)) {
             formats = {
@@ -189,7 +192,10 @@ class MigrateCapabilities {
         if (Versions.compare(version, "0.3.x", "<=")) {
             throw "Migrating from API version 0.3.0 and older is not supported.";
         }
-        let types = Utils.deepClone(originalTypes);
+        let types = {};
+        if (Utils.isObject(originalTypes)) {
+            types = Utils.deepClone(originalTypes);
+        }
         if (Versions.compare(version, "0.4.x", "=")) {
             for(let t in types) {
                 if (!Utils.isObject(types[t])) {

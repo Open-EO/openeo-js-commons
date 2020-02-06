@@ -12,6 +12,18 @@ class Utils {
 	static isObject(obj) {
 		return (typeof obj === 'object' && obj === Object(obj) && !Array.isArray(obj));
     }
+
+	/**
+	 * Checks whether a variable is numeric.
+	 * 
+	 * Numeric is every string with numeric data or a number, excluding NaN and finite numbers.
+	 * 
+	 * @param {*} n - A variable to check.
+	 * @returns {boolean} - `true` is the given variable is numeric, `false` otherwise.
+	 */
+	static isNumeric(n) {
+		return !isNaN(parseFloat(n)) && isFinite(n);
+    }
     
     /**
      * Deep clone for JSON-compatible data.

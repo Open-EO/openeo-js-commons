@@ -2,14 +2,30 @@ const Utils = require('../src/utils.js');
 
 describe('Utils Tests', () => {
 
+	class Test {}
 	test('isObject', () => {
-		class Test {}
 		expect(Utils.isObject(null)).toBe(false); // null
+		expect(Utils.isObject(true)).toBe(false); // boolean
 		expect(Utils.isObject([])).toBe(false); // array
 		expect(Utils.isObject(123)).toBe(false); // number
 		expect(Utils.isObject(Math.min)).toBe(false); // function
 		expect(Utils.isObject({})).toBe(true); // plain object
 		expect(Utils.isObject(new Test())).toBe(true); // object instance
+	});
+
+	test('isNumeric', () => {
+		expect(Utils.isNumeric(null)).toBe(false);
+		expect(Utils.isNumeric(true)).toBe(false);
+		expect(Utils.isNumeric([])).toBe(false);
+		expect(Utils.isNumeric(Math.min)).toBe(false);
+		expect(Utils.isNumeric({})).toBe(false);
+		expect(Utils.isNumeric(new Test())).toBe(false);
+		expect(Utils.isNumeric(NaN)).toBe(false);
+		expect(Utils.isNumeric(Infinity)).toBe(false);
+		expect(Utils.isNumeric("123")).toBe(true);
+		expect(Utils.isNumeric(123)).toBe(true);
+		expect(Utils.isNumeric(123.456)).toBe(true);
+		expect(Utils.isNumeric(1e+10)).toBe(true);
 	});
 
 	test('deepClone', () => {

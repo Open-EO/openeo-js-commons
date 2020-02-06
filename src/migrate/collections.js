@@ -1,70 +1,241 @@
 const Utils = require('../utils.js');
+const Versions = require('../versions.js');
 
-var MigrateCollections = {
+const extMap = {
+    "cube": "datacube",
+    "eo": "eo",
+    "label": "label",
+    "pc": "pointcloud",
+    "proj": "projection",
+    "sar": "sar",
+    "sat": "sat",
+    "sci": "scientific"
+};
 
-    guessCollectionSpecVersion(c) {
-        var version = "0.4";
-        // Try to guess a version
-        if (typeof c.id === 'undefined' && typeof c.name !== 'undefined') { // No id defined, probably v0.3
-            version = "0.3";
-        }
-        return version;
-    },
+const fieldMap = {
+    // Item to core
+    'item:license': 'license',
+    'item:providers': 'providers',
+    // EO to core
+    'eo:instrument': 'instruments',
+    'eo:platform': 'platform',
+    'eo:constellation': 'constellation',
+    // EO to proj
+    'eo:epsg': 'proj:epsg',
+    // EO to sat
+    'eo:off_nadir': 'sat:off_nadir_angle',
+    'eo:azimuth': 'sat:azimuth_angle',
+    'eo:sun_azimuth': 'sat:sun_azimuth_angle',
+    'eo:sun_elevation': 'sat:sun_elevation_angle',
+    // Datetime Range to core
+    'dtr:start_datetime': 'start_datetime',
+    'dtr:end_datetime': 'end_datetime',
+    // Point Cloud
+    'pc:schema': 'pc:schemas',
+    // SAR rename
+    'sar:type': 'sar:product_type',
+    'sar:polarization': 'sar:polarizations',
+    // SAR to core
+    'sar:instrument': 'instruments',
+    'sar:platform': 'platform',
+    'sar:constellation': 'constellation',
+    // SAR to sat
+    'sar:off_nadir': 'sat:off_nadir_angle',
+    'sar:relative_orbit': 'sat:relative_orbit',
+// The following four fields don't translate directly, see code below
+    'sar:pass_direction': 'sat:orbit_state',
+//   sar:resolution => sar:resolution_range, sar:resolution_azimuth
+//   sar:pixel_spacing => sar:pixel_spacing_range, sar:pixel_spacing_azimuth
+//   sar:looks => sar:looks_range, sar:looks_azimuth, sar:looks_equivalent_number (opt)
+};
+
+const moveToRoot = [
+    'cube:dimensions',
+    'sci:publications',
+    'sci:doi',
+    'sci:citation'
+];
+
+class MigrateCollections {
 
     // Always returns a copy of the input collection object
-    convertCollectionToLatestSpec(originalCollection, version = null) {
-        var collection = Object.assign({}, originalCollection);
-        if (!Object.keys(collection).length) {
-            return collection;
+    static convertCollectionToLatestSpec(originalCollection, version) {
+        if (Versions.compare(version, "0.3.x", "<=")) {
+            throw "Migrating from API version 0.3.0 and older is not supported.";
         }
-        if (version === null) {
-            version = this.guessCollectionSpecVersion(collection);
-        }
-        // convert v0.3 processes to v0.4 format
-        if (Utils.compareVersion(version, "0.3.x") === 0) {
-            // name => id
-            collection.id = collection.name;
-            delete collection.name;
 
-            // Add stac_version
-            collection.stac_version = '0.6.1';
-            // Rename provider => providers
-            if (Array.isArray(collection.provider)) {
-                collection.providers = collection.provider;
-                delete collection.provider;
+        // Make sure we don't alter the original object
+        let collection = Utils.deepClone(originalCollection);
+
+        // If collection has no id => seems to be an invalid collection => abort
+        if (typeof collection.id !== 'string' || collection.id.length === 0) {
+            return {};
+        }
+
+        // Update stac_version
+        if (!Versions.validate(collection.stac_version) || Versions.compare(collection.stac_version, "0.9.0", "<")) {
+            collection.stac_version = "0.9.0";
+        }
+
+        // Add missing extent upfront. Makes the following code simpler as it works on the object.
+        if (!Utils.isObject(collection.extent)) {
+            collection.extent = {};
+        }
+
+        // convert v0.4 collections to latest version
+        if (Versions.compare(version, "0.4.x", "=")) {
+            // Restructure spatial extent
+            if (Array.isArray(collection.extent.spatial)) {
+                collection.extent.spatial = {
+                    bbox: [
+                        collection.extent.spatial
+                    ]
+                };
             }
-            if (typeof collection.properties !== 'object') {
-                collection.properties = {};
+            // Restructure temporal extent
+            if (Array.isArray(collection.extent.temporal)) {
+                collection.extent.temporal = {
+                    interval: [
+                        collection.extent.temporal
+                    ]
+                };
             }
-            // Migrate eo:bands
-            if (collection['eo:bands'] !== null && typeof collection['eo:bands'] === 'object' && !Array.isArray(collection['eo:bands'])) {
-                var bands = [];
-                for(let key in collection['eo:bands']) {
-                    var band = Object.assign({}, collection['eo:bands'][key]);
-                    band.name = key;
-                    if (typeof band.resolution !== 'undefined' && typeof band.gsd === 'undefined') {
-                        band.gsd = band.resolution;
-                        delete band.resolution;
-                    }
-                    if (typeof band.wavelength !== 'undefined' && typeof band.center_wavelength === 'undefined') {
-                        band.center_wavelength = band.wavelength;
-                        delete band.wavelength;
-                    }
-                    bands.push(band);
+
+            // move properties to other_properties
+            if (Utils.isObject(collection.properties)) {
+                if (!Utils.isObject(collection.other_properties)) {
+                    collection.other_properties = {};
                 }
-                collection['eo:bands'] = bands;
+                for(let key in collection.properties) {
+                    collection.other_properties[key] = {
+                        values: [
+                            collection.properties[key]
+                        ]
+                    };
+                }
             }
-            // Move all other properties into properties.
-            for (let key in collection) {
-                if (key.includes(':')) {
-                    collection.properties[key] = collection[key];
-                    delete collection[key];
+            delete collection.properties;
+
+            // now we can work on all properties and migrate to summaries
+            let props = Utils.isObject(collection.other_properties) ? collection.other_properties : {};
+            for(let key in props) {
+                let val = props[key];
+                if (Utils.isObject(val) && (Array.isArray(val.extent) || Array.isArray(val.values))) {
+                    if (Array.isArray(val.extent)) {
+                        props[key] = {
+                            min: val.extent[0],
+                            max: val.extent[1]
+                        };
+                    }
+                    else { // val.value is an array
+                        let is2dArray = val.values.filter(v => !Array.isArray(v)).length === 0;
+                        if (is2dArray) {
+                            if (val.values.length < 2) {
+                                props[key] = val.values[0];
+                            }
+                            else {
+                                props[key] = val.values.reduce((a, b) => a.concat(b));
+                            }
+                        }
+                        else {
+                            props[key] = val.values;
+                        }
+                    }
+                }
+                else {
+                    // If not valid, move to top-level
+                    if (typeof collection[key] === 'undefined') {
+                        collection[key] = val;
+                    }
+                    delete props[key];
+                }
+            }
+            delete collection.other_properties;
+
+            collection.summaries = Utils.isObject(collection.summaries) ? collection.summaries : {};
+            for(let key in props) {
+                let val = props[key];
+
+                if (key === 'sar:pass_direction') {
+                    // Convert null to geostationary
+                    val = val.map(v => v === null ? 'geostationary' : v);
+                }
+
+                // Convert arrays into separate fields as needed for some SAR fields
+                if ((key === 'sar:resolution' || key === 'sar:pixel_spacing' || key === 'sar:looks') && Array.isArray(val) && val.length >= 2) {
+                    collection.summaries[key + '_range'] = val.slice(0,1);
+                    collection.summaries[key + '_azimuth'] = val.slice(1,2);
+                    if (val.length > 2) {
+                        collection.summaries[key + '_equivalent_number'] = val.slice(2,3);
+                    }
+                }
+                // Do the renaming of fields
+                else if (typeof fieldMap[key] === 'string') {
+                    collection.summaries[fieldMap[key]] = val;
+                }
+                // Move invalid summaries to the top level
+                else if (moveToRoot.includes(key) && Array.isArray(val) && val.length === 1) {
+                    collection[key] = val[0];
+                }
+                // Do the general conversion
+                else {
+                    collection.summaries[key] = val;
                 }
             }
         }
+
+        // Add missing required fields
+        if (typeof collection.description !== 'string') {
+            collection.description = "";
+        }
+        if (!Utils.isObject(collection.extent.spatial)) {
+            collection.extent.spatial = {};
+        }
+        if (!Utils.isObject(collection.extent.temporal)) {
+            collection.extent.temporal = {};
+        }
+        if (typeof collection.license !== 'string') {
+            collection.license = "proprietary";
+        }
+        if (!Utils.isObject(collection.summaries)) {
+            collection.summaries = {};
+        }
+        if (!Utils.isObject(collection['cube:dimensions'])) {
+            collection['cube:dimensions'] = {};
+        }
+
+        // Fix links
+        if (!Array.isArray(collection.links)) {
+            collection.links = [];
+        }
+        // Add missing rel type
+        collection.links = collection.links.map(l => {
+            l.rel = typeof l.rel === 'string' ? l.rel : "related";
+            return l;
+        });
+
+        // Fix stac_extensions
+        var extensions = Array.isArray(collection.stac_extensions) ? collection.stac_extensions : [];
+        for(var key in collection) {
+            let ext = null;
+            let prefix = key.split(':', 1);
+            if (key === 'deprecated' || key === 'version') {
+                ext = 'version';
+            }
+            else if (typeof extMap[prefix] === 'string') {
+                ext = extMap[prefix];
+            }
+
+            if (ext !== null && !extensions.includes(ext)) {
+                extensions.push(ext);
+            }
+        }
+        extensions.sort();
+        collection.stac_extensions = extensions;
+
         return collection;
     }
 
-};
+}
 
 module.exports = MigrateCollections;

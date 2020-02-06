@@ -9,11 +9,10 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     libraryTarget: 'umd'
   },
-  externals: {
-    ajv: 'ajv'
-  },
   plugins: [
     new UnminifiedWebpackPlugin(),
-    new BundleAnalyzerPlugin()
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'static'
+    })
   ],
 };

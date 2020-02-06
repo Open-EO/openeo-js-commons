@@ -1,0 +1,43 @@
+{
+	"WMS": {
+		"parameters": {
+			"version": {
+				"type": "string",
+				"description": "The WMS version to use.",
+				"default": "1.3.0",
+				"enum": ["1.1.1","1.3.0"]
+			}
+		},
+		"attributes": {
+			"layers": {
+				"type": "array",
+				"description": "Array of layer names.",
+				"example": ["roads","countries","water_bodies"]
+			}
+		},
+		"variables": [
+			{
+				"variable_id": "layer",
+				"type": "string",
+				"description": "The layer name.",
+				"default": "roads"
+			},
+			{
+				"variable_id": "a",
+				"description": null
+			},
+			{
+				"variable_id": "b",
+				"type": "number"
+			}
+		],
+		"links": [
+			{
+				"href": "https://www.opengeospatial.org/standards/wms",
+				"rel": "about",
+				"title": "OGC Web Map Service Standard"
+			}
+		]
+	},
+	"WFS": {}
+}

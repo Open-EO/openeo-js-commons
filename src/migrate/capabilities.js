@@ -1,127 +1,260 @@
 const Utils = require('../utils.js');
+const Versions = require('../versions.js');
 
-var MigrateCapabilities = {
+const NO_VERSION = "0.0.0";
 
-    guessApiVersion(capabilties) {
-		if (typeof capabilties.version === 'string') {
-			return capabilties.version;
-		}
-		else if (typeof capabilties.api_version === 'string') {
-			return capabilties.api_version;
-		}
-		else if (capabilties.backend_version || capabilties.title || capabilties.description || capabilties.links) {
-			return "0.4";
-		}
-		else {
-			// This is a wild guess
-			return "0.3";
-		}
-    },
+class MigrateCapabilities {
 
-    // Always returns a copy of the input object
-    convertCapabilitiesToLatestSpec(originalCapabilities, version = null, title = "Unknown") {
-        var capabilities = Object.assign({}, originalCapabilities);
-        if (version === null) {
-            version = this.guessApiVersion(capabilities);
+    /**
+     * Tries to determine the API version from the capabilities object.
+     * 
+     * Returns the version number, e.g. "0.4.2", "1.0.0" or "0.0.0" (if unknown).
+     * 
+     * @param {object} capabilities 
+     * @returns {string}
+     */
+    static guessApiVersion(capabilities) {
+        // No object passed
+        if (!Utils.isObject(capabilities)) {
+            return NO_VERSION;
         }
-        // convert v0.3 capabilities to v0.4 format
-        if (Utils.compareVersion(version, "0.3.x") === 0) {
-            // version => api_version
-            if (typeof capabilities.version !== 'undefined') {
-                delete capabilities.version;
+
+        // Get exact info from version fields
+        if (Versions.validate(capabilities.api_version)) {
+            return capabilities.api_version;
+        }
+        else if (Versions.validate(capabilities.version)) {
+            return capabilities.version;
+        }
+        // Now we are really guessing
+        else if (Array.isArray(capabilities.endpoints)) {
+            if (capabilities.endpoints.filter(e => e.path === '/file_formats' || e.path === '/conformance' || e.path === '/files').length > 0) {
+                return "1.0.0";
+            }
+            else if (capabilities.endpoints.filter(e => e.path === '/output_formats' || e.path === '/files/{user_id}').length > 0) {
+                return "0.4.2";
+            }
+            else if (!capabilities.backend_version && !capabilities.title && !capabilities.description && !capabilities.links) {
+                return "0.3.1";
             }
         }
 
+        // Can't determine version
+        return NO_VERSION;
+    }
+
+    // Always returns a copy of the input object
+    static convertCapabilitiesToLatestSpec(originalCapabilities, version = null, updateVersionNumbers = true, updateEndpointPaths = true, id = "unknown", title = "Unknown", backend_version = "Unknown") {
+        if (version === null) {
+            version = this.guessApiVersion(originalCapabilities);
+        }
+        // Return empty if version number is not available
+        if (version === NO_VERSION) {
+            return {};
+        }
+
+        if (Versions.compare(version, "0.3.x", "<=")) {
+            throw "Migrating from API version 0.3.0 and older is not supported.";
+        }
+
+        let capabilities = Utils.deepClone(originalCapabilities);
+        // Fill & Update version number
+        if (!updateVersionNumbers) {
+            capabilities.api_version = version;
+        }
+        else {
+            capabilities.api_version = "1.0.0";
+        }
+
         // Convert billing plans
-        if (typeof capabilities.billing !== 'undefined') {
+        if (Utils.isObject(capabilities.billing)) {
             capabilities.billing = this.convertBillingToLatestSpec(capabilities.billing, version);
         }
+        else {
+            delete capabilities.billing;
+        }
+
         // Convert endpoints
-        capabilities.endpoints = this.convertEndpointsToLatestSpec(capabilities.endpoints, version);
+        capabilities.endpoints = this.convertEndpointsToLatestSpec(capabilities.endpoints, version, updateEndpointPaths);
+
+        // Fill STAC Version field
+        if (!updateVersionNumbers && Versions.compare(version, "0.4.x", "=")) {
+            capabilities.stac_version = "0.6.2";
+        }
+        else if (updateVersionNumbers || typeof capabilities.stac_version !== 'string') {
+            capabilities.stac_version = "0.9.0";
+        }
 
         // Add missing fields with somewhat useful data
-        if (typeof capabilities.api_version !== 'string') {
-            capabilities.api_version = "0.4.2";
-        }
         if (typeof capabilities.backend_version !== 'string') {
-            capabilities.backend_version = "Unknown";
+            capabilities.backend_version = backend_version;
+        }
+        if (typeof capabilities.id !== 'string') {
+            capabilities.id = id;
         }
         if (typeof capabilities.title !== 'string') {
             capabilities.title = title;
         }
         if (typeof capabilities.description !== 'string') {
-            capabilities.description = "No description provided.";
+            capabilities.description = "";
+        }
+        if (!Array.isArray(capabilities.links)) {
+            capabilities.links = [];
         }
 
         return capabilities;
-    },
+    }
 
     // Always returns a copy of the input object
-    convertBillingToLatestSpec(originalBilling, version) {
-        var billing = Object.assign({}, originalBilling);
-        // convert v0.3 billing info to v0.4 format
-        if (Utils.compareVersion(version, "0.3.x") === 0) {
-            // Add paid flag to billing plans
-            if (Array.isArray(billing.plans)) {
-                billing.plans = billing.plans.map(plan => {
-                    if (typeof plan.paid !== 'boolean') {
-                        plan.paid = true;
-                        if (typeof plan.name === 'string' && plan.name.toLowerCase().includes('free')) {
-                            plan.paid = false;
-                        }
-                    }
-                    return plan;
-                });
-            }
+    static convertBillingToLatestSpec(originalBilling, version) {
+        if (Versions.compare(version, "0.3.x", "<=")) {
+            throw "Migrating from API version 0.3.0 and older is not supported.";
+        }
+        let billing = {};
+        if (Utils.isObject(originalBilling)) {
+            billing = Utils.deepClone(originalBilling);
+        }
+
+        if (typeof billing.currency !== 'string') {
+            billing.currency = null;
         }
 
         return billing;
-    },
+    }
 
     // Always returns a copy of the input object
-    convertEndpointsToLatestSpec(originalEndpoints, version) {
-        var endpoints = [];
-        if (Array.isArray(originalEndpoints)) {
-            endpoints = originalEndpoints.slice(0);
+    static convertEndpointsToLatestSpec(originalEndpoints, version, updatePaths = false) {
+        if (Versions.compare(version, "0.3.x", "<=")) {
+            throw "Migrating from API version 0.3.0 and older is not supported.";
         }
-        // convert v0.3 service types to v0.4 format
-        if (Utils.compareVersion(version, "0.3.x") === 0) {
-            // Nothing to do as nothing has changed.
+        if (!Array.isArray(originalEndpoints)) {
+            return [];
         }
-        return endpoints;
-    },
-
-    // Always returns a copy of the input object
-    convertOutputFormatsToLatestSpec(originalFormats, version) {
-        var formats = Object.assign({}, originalFormats);
-        // convert v0.3 output formats to v0.4 format
-        if (Utils.compareVersion(version, "0.3.x") === 0) {
-            if (typeof formats.formats === 'object' && formats.formats !== null) {
-                return formats.formats;
+        let endpoints = Utils.deepClone(originalEndpoints);
+        // convert v0.4 endpoints to v1.0
+        if (Versions.compare(version, "0.4.x", "=")) {
+            if (updatePaths) {
+                endpoints = endpoints.map(e => {
+                    switch (e.path) {
+                        case '/output_formats':
+                            e.path = '/file_formats';
+                            break;
+                        case '/files/{user_id}':
+                            e.path = '/files';
+                            break;
+                        case '/files/{user_id}/{path}':
+                            e.path = '/files/{path}';
+                            break;
+                    }
+                    return e;
+                });
+            }
+            else {
+                // Nothing to do as structure has not changed.
             }
         }
-        return formats;
-    },
+        return endpoints;
+    }
+
+    // Alias for convertFileFormatsToLatestSpec
+    static convertOutputFormatsToLatestSpec(originalFormats, version) {
+        return this.convertFileFormatsToLatestSpec(originalFormats, version);
+    }
 
     // Always returns a copy of the input object
-    convertServiceTypesToLatestSpec(originalTypes, version) {
-        var types = Object.assign({}, originalTypes);
-        // convert v0.3 service types to v0.4 format
-        if (Utils.compareVersion(version, "0.3.x") === 0) {
-            // Nothing to do as nothing has changed.
+    static convertFileFormatsToLatestSpec(originalFormats, version) {
+        if (Versions.compare(version, "0.3.x", "<=")) {
+            throw "Migrating from API version 0.3.0 and older is not supported.";
+        }
+        let formats = Utils.deepClone(originalFormats);
+
+        if (Versions.compare(version, "0.4.x", "=") && Utils.isObject(formats)) {
+            formats = {
+                output: formats
+            };
+        }
+
+        if (!Utils.isObject(formats.input)) {
+            formats.input = {};
+        }
+        if (!Utils.isObject(formats.output)) {
+            formats.output = {};
+        }
+
+        return formats;
+    }
+
+    // Always returns a copy of the input object
+    static convertServiceTypesToLatestSpec(originalTypes, version) {
+        if (Versions.compare(version, "0.3.x", "<=")) {
+            throw "Migrating from API version 0.3.0 and older is not supported.";
+        }
+        let types = Utils.deepClone(originalTypes);
+        if (Versions.compare(version, "0.4.x", "=")) {
+            for(let t in types) {
+                if (!Utils.isObject(types[t])) {
+                    types[t] = {};
+                    continue;
+                }
+
+                // Remove attributes
+                delete types[t].attributes;
+
+                // Rename parameters to configuration
+
+                if (Utils.isObject(types[t].parameters)) {
+                    types[t].configuration = types[t].parameters;
+                }
+                delete types[t].parameters;
+
+                // Rename variables to process_parameters
+                if (Array.isArray(types[t].variables)) {
+                    types[t].process_parameters = types[t].variables.map(v => {
+                        let param = {
+                            name: v.variable_id,
+                            description: typeof v.description === 'string' ? v.description : "",
+                            schema: {
+                                type: [
+                                    typeof v.type === 'string' ? v.type : "string",
+                                    "null"
+                                ]
+                            }
+                        };
+                        if (typeof v.default !== 'undefined') {
+                            param.default = v.default;
+                        }
+                        return param;
+                    });
+                }
+                delete types[t].variables;
+            }
         }
         return types;
-    },
+    }
 
     // Always returns a copy of the input object
-    convertUdfRuntimesToLatestSpec(originalRuntimes, version) {
-        var runtimes = Object.assign({}, originalRuntimes);
-        if (Utils.compareVersion(version, "0.3.x") === 0) {
-            // Nothing to do, was not supported in 0.3.
+    static convertUdfRuntimesToLatestSpec(originalRuntimes, version) {
+        if (Versions.compare(version, "0.3.x", "<=")) {
+            throw "Migrating from API version 0.3.0 and older is not supported.";
+        }
+        let runtimes = Utils.deepClone(originalRuntimes);
+        // Nothing to do, was not supported in 0.3 and nothing changed in 0.4.
+        if (Versions.compare(version, "0.4.x", "=")) {
+            for(let r in runtimes) {
+                if (!Utils.isObject(runtimes[r])) {
+                    delete runtimes[r];
+                    continue;
+                }
+
+                // null is not allowed any longer, replace with empty string
+                if (runtimes[r].description === null) {
+                    runtimes[r].description = "";
+                }
+            }
         }
         return runtimes;
     }
 
-};
+}
 
 module.exports = MigrateCapabilities;

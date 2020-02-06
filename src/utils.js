@@ -1,40 +1,59 @@
-const compareVersions = require('compare-versions');
+class Utils {
 
-var Utils = {
-
-    compareVersion(v1, v2) {
-        try {
-            return compareVersions(v1, v2);
-        } catch (error) {
-            return null;
-        }
-    },
-
-	isObject(obj) {
+	/**
+	 * Checks whether a variable is a real object or not.
+	 * 
+	 * This is a more strict version of `typeof x === 'object'` as this example would also succeeds for arrays and `null`.
+	 * This function only returns `true` for real objects and not for arrays, `null` or any other data types.
+	 * 
+	 * @param {*} obj - A variable to check.
+	 * @returns {boolean} - `true` is the given variable is an object, `false` otherwise.
+	 */
+	static isObject(obj) {
 		return (typeof obj === 'object' && obj === Object(obj) && !Array.isArray(obj));
-	},
-	
-	size(obj) {
-		if (typeof obj === 'object' && obj !== null) {
-			if (Array.isArray(obj)) {
-				return obj.length;
-			}
-			else {
-				return Object.keys(obj).length;
-			}
-		}
-		return 0;
-	},
+    }
 
-	replacePlaceholders(message, variables = {}) {
-		if (typeof message === 'string' && this.isObject(variables)) {
-			for(var placeholder in variables) {
-				message = message.replace('{' + placeholder + '}', variables[placeholder]);
+	/**
+	 * Checks whether a variable is numeric.
+	 * 
+	 * Numeric is every string with numeric data or a number, excluding NaN and finite numbers.
+	 * 
+	 * @param {*} n - A variable to check.
+	 * @returns {boolean} - `true` is the given variable is numeric, `false` otherwise.
+	 */
+	static isNumeric(n) {
+		return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+    
+    /**
+     * Deep clone for JSON-compatible data.
+     * 
+     * @param {*} x 
+     * @returns {*}
+     */
+    static deepClone(x) {
+        return JSON.parse(JSON.stringify(x));
+    }
+
+	/**
+	 * Normalize a URL (mostly handling slashes).
+	 * 
+	 * @static
+	 * @param {string} baseUrl - The URL to normalize
+	 * @param {string} path - An optional path to add to the URL
+	 * @returns {string} Normalized URL.
+	 */
+	static normalizeUrl(baseUrl, path = null) {
+		let url = baseUrl.replace(/\/$/, ""); // Remove trailing slash from base URL
+		if (typeof path === 'string') {
+			if (path.substr(0, 1) !== '/') {
+				path = '/' + path; // Add leading slash to path
 			}
+			url = url + path.replace(/\/$/, ""); // Remove trailing slash from path
 		}
-		return message;
+		return url;
 	}
 
-};
+}
 
 module.exports = Utils;

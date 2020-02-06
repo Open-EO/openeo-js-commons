@@ -1,0 +1,47 @@
+{
+	"PHP7":{
+		"description":null,
+		"docker":"openeo/udf-php7",
+		"default":"latest",
+		"tags":[
+			"latest",
+			"7.3.1",
+			"7.3",
+			"7.2"
+		],
+		"links":[
+			{
+				"href":"https://hub.docker.com/openeo/udf-php7/",
+				"rel":"about"
+			}
+		]
+	},
+	"R":{
+		"description":"R programming language with `Rcpp` and `rmarkdown` extensions installed.",
+		"default":"3.5.2",
+		"versions":{
+			"3.5.2":{
+				"libraries":{
+					"Rcpp":{
+						"version":"1.2.0",
+						"links":[
+							{
+								"href":"https://cran.r-project.org/web/packages/Rcpp/index.html",
+								"rel":"about"
+							}
+						]
+					},
+					"rmarkdown":{
+						"version":"1.7.0",
+						"links":[
+							{
+								"href":"https://cran.r-project.org/web/packages/rmarkdown/index.html",
+								"rel":"about"
+							}
+						]
+					}
+				}
+			}
+		}
+	}
+}

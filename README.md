@@ -3,38 +3,34 @@ A set of common JavaScript functionalities for [openEO](http://openeo.org).
 
 [![Build Status](https://travis-ci.org/Open-EO/openeo-js-commons.svg?branch=master)](https://travis-ci.org/Open-EO/openeo-js-commons)
 
-This library's version is **0.4.5** and supports **openEO API version 0.4.x**. Legacy versions are available as releases.
+This library's version is **1.0.0-rc.1** and supports **openEO API version 1.0.x**. Legacy versions are available as releases.
 
 ## Features
-- Converting responses to the latest API version is supported for:
+- Converting responses from API version 0.4 to the latest API version is supported for:
     - Capabilities
     - Collections
     - Processes
     - Output Formats
     - Service Types
-- Feature detection
-- Process graph handling:
-    - Parsing a process graph
-    - Validation based on the JSON Schemas
-    - Framework to implement process graph execution
-- JSON Schema validation for Process parameters and return values
+    - UDF Runtimes
+- Back-end feature detection
+- Validate, compare and prioritize version numbers (e.g. for well-known discovery)
+
+**Note:** 
+- Process graph parsing has been moved to [openeo-js-processgraphs](https://github.com/Open-EO/openeo-js-processgraphs).
+- Support for migrating from API 0.3 to the latest API version has been dropped. Use the library in version 0.4 instead.
 
 ## Usage
 
 To use it in a node environment use: `npm install @openeo/js-commons`
 
-You can then require the parts of the library you want to use. For example: `const { FeatureList } = require('@openeo/js-commons');`
+You can then require the parts of the library you want to use. For example: `const { MigrateProcesses } = require('@openeo/js-commons');`
 
 In a web environment you can include the library as follows:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@openeo/js-commons@0.4/dist/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@openeo/js-commons@1.0.0-rc.1/dist/main.min.js"></script>
 ```
+<!-- When releasing a stable release, change the version to @1 instead of 1.0.0 to allow backward-compatible upgrades -->
 
-This library has a peer dependency to `ajv`, so if you'd like to use process graph validation or execution you need to include `ajv` (v6.10) in your package.json or include it in your web page:
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/ajv@6.10/lib/ajv.min.js"></script>
-```
-
-More information can be found in the [**JS commons documentation**](https://open-eo.github.io/openeo-js-commons/0.4.5/).
+More information can be found in the [**JS commons documentation**](https://open-eo.github.io/openeo-js-commons/1.0.0-rc.1/).

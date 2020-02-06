@@ -1,0 +1,19 @@
+{
+	"id": "example",
+	"description": "Fetch an example script from a URL.",
+	"parameters": {
+		"url": {
+			"schema": {
+				"type": ["string", "null"],
+				"format": "url",
+				"default": null
+			}
+		},
+		"code": null
+	},
+	"returns": {
+		"media_type": "application/xml",
+		"schema": {
+		}
+	}
+}

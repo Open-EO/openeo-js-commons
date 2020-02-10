@@ -13,7 +13,7 @@
             "schema": {
                 "type": "string",
                 "subtype": "collection-id",
-                "pattern": "^[A-Za-z0-9_\\-\\.~/]+$"
+                "pattern": "^[\\w\\-\\.~/]+$"
             }
         },
         {
@@ -59,7 +59,7 @@
                                     "title": "EPSG Code",
                                     "type": "integer",
                                     "subtype": "epsg-code",
-                                    "examples": [7099]
+                                    "examples": [3857]
                                 },
                                 {
                                     "title": "PROJ definition",

@@ -9,7 +9,8 @@ const extMap = {
     "proj": "projection",
     "sar": "sar",
     "sat": "sat",
-    "sci": "scientific"
+    "sci": "scientific",
+    "view": "view"
 };
 
 const fieldMap = {
@@ -22,11 +23,11 @@ const fieldMap = {
     'eo:constellation': 'constellation',
     // EO to proj
     'eo:epsg': 'proj:epsg',
-    // EO to sat
-    'eo:off_nadir': 'sat:off_nadir_angle',
-    'eo:azimuth': 'sat:azimuth_angle',
-    'eo:sun_azimuth': 'sat:sun_azimuth_angle',
-    'eo:sun_elevation': 'sat:sun_elevation_angle',
+    // EO to view
+    'eo:off_nadir': 'view:off_nadir',
+    'eo:azimuth': 'view:azimuth',
+    'eo:sun_azimuth': 'view:sun_azimuth',
+    'eo:sun_elevation': 'view:sun_elevation',
     // Datetime Range to core
     'dtr:start_datetime': 'start_datetime',
     'dtr:end_datetime': 'end_datetime',

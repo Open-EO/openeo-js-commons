@@ -12,7 +12,6 @@
 	"browser": true,
 	"node": true,
 	"globals": {
-		"axios": true,
 		"define": true
 	}
 }

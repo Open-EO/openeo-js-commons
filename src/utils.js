@@ -12,6 +12,18 @@ class Utils {
 	static isObject(obj) {
 		return (typeof obj === 'object' && obj === Object(obj) && !Array.isArray(obj));
     }
+	
+	static size(obj) {
+		if (typeof obj === 'object' && obj !== null) {
+			if (Array.isArray(obj)) {
+				return obj.length;
+			}
+			else {
+				return Object.keys(obj).length;
+			}
+		}
+		return 0;
+	}
 
 	/**
 	 * Checks whether a variable is numeric.
@@ -52,6 +64,16 @@ class Utils {
 			url = url + path.replace(/\/$/, ""); // Remove trailing slash from path
 		}
 		return url;
+	}
+
+	static replacePlaceholders(message, variables = {}) {
+		if (typeof message === 'string' && Utils.isObject(variables)) {
+			for(var placeholder in variables) {
+				let vars = variables[placeholder];
+				message = message.replace('{' + placeholder + '}', Array.isArray(vars) ? vars.join("; ") : vars);
+			}
+		}
+		return message;
 	}
 
 }

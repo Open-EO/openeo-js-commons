@@ -1,6 +1,10 @@
 {
   "name": "@openeo/js-commons",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
+  "apiVersions": [
+    "0.4.x",
+    "1.0.x"
+  ],
   "author": "openEO Consortium",
   "contributors": [
     {

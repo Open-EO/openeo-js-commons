@@ -2,13 +2,13 @@
 
 A set of common JavaScript functionalities for [openEO](http://openeo.org).
 
-This library's version is ![Version](https://img.shields.io/github/package-json/v/Open-EO/openeo-js-commons/dev) and supports ![Supported API Versions](https://img.shields.io/github/package-json/apiVersions/Open-Eo/openeo-js-commons/dev).
+This library's version is ![Version](https://img.shields.io/github/package-json/v/Open-EO/openeo-js-commons/master) and supports ![Supported API Versions](https://img.shields.io/github/package-json/apiVersions/Open-Eo/openeo-js-commons/master).
 
-This branch is the **development branch**, this library version is **unreleased** yet.
+This is the stable **master branch**, this library version is **1.0.0-rc.2**.
 
-[![Build Status](https://travis-ci.org/Open-EO/openeo-js-commons.svg?branch=dev)](https://travis-ci.org/Open-EO/openeo-js-commons)
-![Minified Size](https://img.shields.io/bundlephobia/min/@openeo/js-commons/1.0.0-rc.1)
-![Minzipped Size](https://img.shields.io/bundlephobia/minzip/@openeo/js-commons/1.0.0-rc.1)
+[![Build Status](https://travis-ci.org/Open-EO/openeo-js-commons.svg?branch=master)](https://travis-ci.org/Open-EO/openeo-js-commons)
+![Minified Size](https://img.shields.io/bundlephobia/min/@openeo/js-commons/1.0.0-rc.2)
+![Minzipped Size](https://img.shields.io/bundlephobia/minzip/@openeo/js-commons/1.0.0-rc.2)
 
 ## Features
 - Converting responses from API version 0.4 to the latest API version is supported for:

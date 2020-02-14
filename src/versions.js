@@ -1,7 +1,5 @@
 const VersionCompare = require('compare-versions');
 
-const semver = /^v?(?:\d+)(\.(?:[x*]|\d+)(\.(?:[x*]|\d+)(\.(?:[x*]|\d+))?(?:-[\da-z\-]+(?:\.[\da-z\-]+)*)?(?:\+[\da-z\-]+(?:\.[\da-z\-]+)*)?)?)?$/i;
-
 class Versions {
 
     static compare(v1, v2, operator = null) {
@@ -13,13 +11,8 @@ class Versions {
 		}
 	}
 
-	// Function or regexp is coming from compare-version, but not exposed so copied it here.
-	// See also https://github.com/omichelsen/compare-versions/issues/37
 	static validate(version) {
-		if (typeof version !== 'string') {
-			return false;
-		}
-		return semver.test(version);
+		return VersionCompare.validate(version);
 	}
 
 	/**

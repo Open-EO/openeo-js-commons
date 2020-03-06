@@ -81,6 +81,8 @@ class MigrateProcesses {
         }
         process.returns = upgradeSchema(process.returns, version, false);
 
+        // Update process graph -> nothing to do yet
+
         return process;
     }
 

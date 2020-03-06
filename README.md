@@ -18,7 +18,6 @@ This branch is the **development branch**, this library version is **unreleased*
     - Output Formats
     - Service Types
     - UDF Runtimes
-    - Process Graphs (structure only)
 - Back-end feature detection
 - Validate, compare and prioritize version numbers (e.g. for well-known discovery)
 

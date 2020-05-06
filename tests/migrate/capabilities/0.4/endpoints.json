@@ -25,5 +25,20 @@
 			"GET",
 			"POST"
 		]
+	},
+	{
+		"path":"/process_graphs",
+		"methods":[
+			"GET",
+			"POST"
+		]
+	},
+	{
+		"path":"/process_graphs/{process_graph_id}",
+		"methods":[
+			"GET",
+			"PATCH",
+			"DELETE"
+		]
 	}
 ]

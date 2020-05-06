@@ -10,6 +10,7 @@ describe('Basic Capabilities Migration Tests', () =>  {
 
 	const ep04 = require('./capabilities/0.4/endpoints.json');
 	const ep10 = require('./capabilities/1.0/endpoints.json');
+	const ep10rc1 = require('./capabilities/1.0/endpoints-rc1.json');
 
 	test('Guess Api Versions', () =>  {
 		expect(MigrateCapabilities.guessApiVersion(null)).toBe("0.0.0");
@@ -65,6 +66,8 @@ describe('Basic Capabilities Migration Tests', () =>  {
 		expect(MigrateCapabilities.convertEndpointsToLatestSpec(ep04, "0.4.0", true)).toEqual(ep10);
 		expect(MigrateCapabilities.convertEndpointsToLatestSpec(c04min.endpoints, "0.4.0", false)).toEqual(c10minKeep.endpoints);
 		expect(MigrateCapabilities.convertEndpointsToLatestSpec(c04min.endpoints, "0.4.0", true)).toEqual(c10minUpdate.endpoints);
+		// Test that 1.0.0 RC1 data gets converted
+		expect(MigrateCapabilities.convertEndpointsToLatestSpec(ep10rc1, "1.0.0-rc.1", true)).toEqual(ep10);
 		// Test that endpoints following the latest spec doesn't change at all
 		expect(MigrateCapabilities.convertEndpointsToLatestSpec(ep10, "1.0.0", true)).toEqual(ep10);
 		expect(MigrateCapabilities.convertEndpointsToLatestSpec(c04min.endpoints, "1.0.0")).toEqual(c10minKeep.endpoints);

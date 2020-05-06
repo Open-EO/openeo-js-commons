@@ -132,9 +132,30 @@ class MigrateCapabilities {
         }
         let endpoints = Utils.deepClone(originalEndpoints);
         // convert v0.4 endpoints to v1.0
-        if (Versions.compare(version, "0.4.x", "=")) {
-            if (updatePaths) {
-                endpoints = endpoints.map(e => {
+        if (updatePaths) {
+            let isV04 = Versions.compare(version, "0.4.x", "=");
+            let isLtV100RC2 = Versions.compare(version, "1.0.0-rc.2", "<");
+
+            let addPutToPg = function(endpoints) {
+                let newPgPath = '/process_graphs/{process_graph_id}';
+                let i = endpoints.findIndex(e => e.path === newPgPath);
+                if (i >= 0) {
+                    if (endpoints[i].methods.indexOf('PUT') === -1) {
+                        endpoints[i].methods.push('PUT');
+                    }
+                }
+                else {
+                    endpoints.push({
+                        path: newPgPath,
+                        methods: ['PUT']
+                    });
+                }
+                return endpoints;
+            };
+
+            for(var i in endpoints) {
+                let e = endpoints[i];
+                if (isV04) {
                     switch (e.path) {
                         case '/output_formats':
                             e.path = '/file_formats';
@@ -146,11 +167,25 @@ class MigrateCapabilities {
                             e.path = '/files/{path}';
                             break;
                     }
-                    return e;
-                });
-            }
-            else {
-                // Nothing to do as structure has not changed.
+                }
+                if (isLtV100RC2) {
+                    switch (e.path) {
+                        case '/process_graphs':
+                            let post = e.methods.indexOf('POST');
+                            if (post >= 0) {
+                                e.methods.splice(post, 1);
+                                addPutToPg(endpoints);
+                            }
+                            break;
+                        case '/process_graphs/{process_graph_id}':
+                            let patch = e.methods.indexOf('PATCH');
+                            if (patch >= 0) {
+                                e.methods.splice(patch, 1);
+                                addPutToPg(endpoints);
+                            }
+                            break;
+                    }
+                }
             }
         }
         return endpoints;

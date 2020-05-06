@@ -6,6 +6,13 @@
 			"methods": [
 				"GET"
 			]
+		},
+		{
+			"path":"/process_graphs",
+			"methods":[
+				"GET",
+				"POST"
+			]
 		}
 	],
 	"links": []

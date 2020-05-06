@@ -11,6 +11,18 @@
 			"methods": [
 				"GET"
 			]
+		},
+		{
+			"path":"/process_graphs",
+			"methods":[
+				"GET"
+			]
+		},
+		{
+			"path":"/process_graphs/{process_graph_id}",
+			"methods":[
+				"PUT"
+			]
 		}
 	],
 	"links": []

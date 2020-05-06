@@ -29,15 +29,16 @@
 	{
 		"path":"/process_graphs",
 		"methods":[
-			"GET"
+			"GET",
+			"POST"
 		]
 	},
 	{
 		"path":"/process_graphs/{process_graph_id}",
 		"methods":[
 			"GET",
-			"DELETE",
-			"PUT"
+			"PATCH",
+			"DELETE"
 		]
 	}
 ]

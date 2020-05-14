@@ -86,6 +86,9 @@ class MigrateCapabilities {
         }
 
         // Add missing fields with somewhat useful data
+        if (typeof capabilities.production !== 'boolean') {
+            capabilities.production = Versions.compare(version, "1.0.0-rc.1", "=") || Versions.compare(version, "1.0.0-rc.2", "=") ? true : false;
+        }
         if (typeof capabilities.backend_version !== 'string') {
             capabilities.backend_version = backend_version;
         }

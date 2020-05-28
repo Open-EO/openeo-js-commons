@@ -51,8 +51,8 @@ class Versions {
 		}
 
 		return compatible.sort((c1, c2) => {
-			let p1 = c1.production !== false;
-			let p2 = c2.production !== false;
+			let p1 = c1.production === true;
+			let p2 = c2.production === true;
 			if (!preferProduction || p1 === p2) {
 				return Versions.compare(c1.api_version, c2.api_version) * -1; // `* -1` to sort in descending order.
 			}

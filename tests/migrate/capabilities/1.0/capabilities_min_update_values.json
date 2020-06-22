@@ -2,6 +2,7 @@
 	"api_version": "1.0.0",
 	"backend_version": "0.1.0",
 	"stac_version": "0.9.0",
+	"production": false,
 	"id": "test",
 	"title": "Test API",
 	"description": "",

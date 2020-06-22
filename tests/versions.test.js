@@ -2,6 +2,7 @@ const Versions = require('../src/versions.js');
 
 const v051prod = {
 	"url": "https://www.openeo.org/api/v0.5",
+	"production": true,
 	"api_version": "0.5.1"
 };
 const v100rc1 = {
@@ -11,11 +12,11 @@ const v100rc1 = {
 };
 const v100prod = {
 	"url": "https://www.openeo.org/api/v1.0",
+	"production": true,
 	"api_version": "1.0.0"
 };
 const v110beta = {
 	"url": "https://www.openeo.org/api/v1.1",
-	"production": false,
 	"api_version": "1.1.0-beta"
 };
 

@@ -1,3 +1,4 @@
+/** General utilities */
 class Utils {
 
 	/**

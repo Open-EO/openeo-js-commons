@@ -1,6 +1,7 @@
 {
 	"PHP7":{
 		"description":"",
+		"type": "docker",
 		"docker":"openeo/udf-php7",
 		"default":"latest",
 		"tags":[
@@ -19,6 +20,7 @@
 	"R":{
 		"description":"R programming language with `Rcpp` and `rmarkdown` extensions installed.",
 		"default":"3.5.2",
+		"type": "language",
 		"versions":{
 			"3.5.2":{
 				"libraries":{

@@ -2,7 +2,7 @@
 	"WMS": {
 		"configuration": {
 			"version": {
-				"type": "string",
+				"type": ["string","null"],
 				"description": "The WMS version to use.",
 				"default": "1.3.0",
 				"enum": ["1.1.1","1.3.0"]
@@ -40,5 +40,8 @@
 			}
 		]
 	},
-	"WFS": {}
+	"WFS": {
+		"configuration": {},
+		"process_parameters": []
+	}
 }

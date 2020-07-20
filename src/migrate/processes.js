@@ -1,16 +1,54 @@
 const Utils = require('../utils.js');
 const Versions = require('../versions.js');
+const MigrateCommons = require('./commons.js');
 
+/** Migrate processes related responses to the latest version. */
 class MigrateProcesses {
 
-    // Always returns a copy of the input process object
-    static convertProcessToLatestSpec(originalProcess, version) {
+    /**
+     * Converts a `GET /process` response to the latest version.
+     * 
+     * Always returns a deep copy of the input object.
+     * 
+     * @param {object} response - The response to convert
+     * @param {string} version - Version number of the API, which the response conforms to
+     * @returns {object}
+     */
+    static convertProcessesToLatestSpec(response, version) {
         if (Versions.compare(version, "0.3.x", "<=")) {
             throw "Migrating from API version 0.3.0 and older is not supported.";
         }
 
         // Make sure we don't alter the original object
-        let process = Utils.deepClone(originalProcess);
+        response = Utils.deepClone(response);
+
+        if (Array.isArray(response.processes)) {
+            response.processes = response.processes
+                .map(p => MigrateProcesses.convertProcessToLatestSpec(p, version))
+                .filter(p => typeof p.id === 'string');
+        }
+
+        response.links = MigrateCommons.migrateLinks(response.links, version);
+
+        return response;
+    }
+
+    /**
+     * Converts a single process to the latest version.
+     * 
+     * Always returns a deep copy of the input object.
+     * 
+     * @param {object} process - The process to convert
+     * @param {string} version - Version number of the API, which the process conforms to
+     * @returns {object}
+     */
+    static convertProcessToLatestSpec(process, version) {
+        if (Versions.compare(version, "0.3.x", "<=")) {
+            throw "Migrating from API version 0.3.0 and older is not supported.";
+        }
+
+        // Make sure we don't alter the original object
+        process = Utils.deepClone(process);
 
         // If process has no id => seems to be an invalid process => abort
         if (typeof process.id !== 'string' || process.id.length === 0) {
@@ -81,6 +119,15 @@ class MigrateProcesses {
         }
         process.returns = upgradeSchema(process.returns, version, false);
 
+        // Remove process graphs from examples (and ensure there are arguments given)
+        if (Array.isArray(process.examples)) {
+            process.examples = process.examples.filter(example => Utils.isObject(example) && Utils.isObject(example.arguments));
+        }
+
+        if (typeof process.links !== 'undefined') { // links not required, so only apply if defined anyway
+            process.links = MigrateCommons.migrateLinks(process.links, version);
+        }
+
         // Update process graph -> nothing to do yet
 
         return process;
@@ -123,6 +170,13 @@ function upgradeSchema(obj, version, isParam = true) {
             // Replace media_type field with contentMediaType from JSON Schemas
             if (moveMediaType) {
                 subSchema.contentMediaType = obj.media_type;
+            }
+        }
+
+        // Clients SHOULD automatically set `optional` to `true`, if a default value is specified.
+        if (Versions.compare(version, "0.4.x", ">")) {
+            if (typeof obj.default !== 'undefined') {
+                obj.optional = true;
             }
         }
 

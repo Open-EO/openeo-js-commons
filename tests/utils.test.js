@@ -45,7 +45,11 @@ describe('Utils Tests', () => {
 		expect(Utils.deepClone(123.01)).toEqual(123.01);
 		expect(Utils.deepClone({})).toEqual({}); // object
 		expect(Utils.deepClone({a:"b"})).toEqual({a:"b"});
-		expect(Utils.deepClone({a:"b",c:{d:"e"}})).toEqual({a:"b",c:{d:"e"}});
+		let o1 = {a:"b",c:{d:"e"}};
+		let o2 = {a:"b",c:{d:"e"}};
+		let c = Utils.deepClone(o1);
+		expect(c).toEqual(o2);
+		expect(c).not.toBe(o1);
 	});
 
 	test('normalizeUrl', () => {

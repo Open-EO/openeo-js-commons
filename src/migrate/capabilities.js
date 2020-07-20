@@ -1,8 +1,10 @@
 const Utils = require('../utils.js');
 const Versions = require('../versions.js');
+const MigrateCommons = require('./commons.js');
 
 const NO_VERSION = "0.0.0";
 
+/** Migrate capabilities related responses to the latest version. */
 class MigrateCapabilities {
 
     /**
@@ -101,9 +103,7 @@ class MigrateCapabilities {
         if (typeof capabilities.description !== 'string') {
             capabilities.description = "";
         }
-        if (!Array.isArray(capabilities.links)) {
-            capabilities.links = [];
-        }
+        capabilities.links = MigrateCommons.migrateLinks(capabilities.links, version);
 
         return capabilities;
     }
@@ -215,12 +215,8 @@ class MigrateCapabilities {
             };
         }
 
-        if (!Utils.isObject(formats.input)) {
-            formats.input = {};
-        }
-        if (!Utils.isObject(formats.output)) {
-            formats.output = {};
-        }
+        formats.input = upgradeFileFormats(formats.input, version);
+        formats.output = upgradeFileFormats(formats.output, version);
 
         return formats;
     }
@@ -234,18 +230,16 @@ class MigrateCapabilities {
         if (Utils.isObject(originalTypes)) {
             types = Utils.deepClone(originalTypes);
         }
-        if (Versions.compare(version, "0.4.x", "=")) {
-            for(let t in types) {
-                if (!Utils.isObject(types[t])) {
-                    types[t] = {};
-                    continue;
-                }
-
+        for(let t in types) {
+            if (!Utils.isObject(types[t])) {
+                types[t] = {};
+                continue;
+            }
+            if (Versions.compare(version, "0.4.x", "=")) {
                 // Remove attributes
                 delete types[t].attributes;
 
                 // Rename parameters to configuration
-
                 if (Utils.isObject(types[t].parameters)) {
                     types[t].configuration = types[t].parameters;
                 }
@@ -272,6 +266,21 @@ class MigrateCapabilities {
                 }
                 delete types[t].variables;
             }
+
+            if (!Utils.isObject(types[t].configuration)) {
+                types[t].configuration = {};
+            }
+            else {
+                types[t].configuration = MigrateCommons.migrateDiscoveryParameters(types[t].configuration, version);
+            }
+
+            if (!Array.isArray(types[t].process_parameters)) {
+                types[t].process_parameters = [];
+            }
+
+            if (typeof types[t].links !== 'undefined') { // links not required, so only apply if defined anyway
+                types[t].links = MigrateCommons.migrateLinks(types[t].links, version);
+            }
         }
         return types;
     }
@@ -282,9 +291,9 @@ class MigrateCapabilities {
             throw "Migrating from API version 0.3.0 and older is not supported.";
         }
         let runtimes = Utils.deepClone(originalRuntimes);
+        for(let r in runtimes) {
         // Nothing to do, was not supported in 0.3 and nothing changed in 0.4.
-        if (Versions.compare(version, "0.4.x", "=")) {
-            for(let r in runtimes) {
+            if (Versions.compare(version, "0.4.x", "=")) {
                 if (!Utils.isObject(runtimes[r])) {
                     delete runtimes[r];
                     continue;
@@ -295,10 +304,53 @@ class MigrateCapabilities {
                     runtimes[r].description = "";
                 }
             }
+
+            if (typeof runtimes[r].type !== 'string') {
+                if (typeof runtimes[r].docker === 'string') {
+                    runtimes[r].type = 'docker';
+                }
+                else {
+                    runtimes[r].type = 'language';
+                }
+            }
+
+            if (typeof runtimes[r].links !== 'undefined') { // links not required, so only apply if defined anyway
+                runtimes[r].links = MigrateCommons.migrateLinks(runtimes[r].links, version);
+            }
         }
+
         return runtimes;
     }
 
+}
+
+const GIS_DATA_TYPES = ['raster', 'vector', 'table', 'other'];
+
+function upgradeFileFormats(formats, version) {
+    if (!Utils.isObject(formats)) {
+        formats = {};
+    }
+    for(let id in formats) {
+        if (!Utils.isObject(formats[id].parameters)) {
+            formats[id].parameters = {};
+        }
+        else {
+            formats[id].parameters = MigrateCommons.migrateDiscoveryParameters(formats[id].parameters, version);
+        }
+
+        // Can be empty: https://github.com/Open-EO/openeo-api/issues/325
+        if (!Array.isArray(formats[id].gis_data_types)) {
+            formats[id].gis_data_types = [];
+        }
+        else {
+            formats[id].gis_data_types = formats[id].gis_data_types.filter(t => GIS_DATA_TYPES.includes(t));
+        }
+
+        if (typeof formats[id].links !== 'undefined') { // links not required, so only apply if defined anyway
+            formats[id].links = MigrateCommons.migrateLinks(formats[id].links, version);
+        }
+    }
+    return formats;
 }
 
 module.exports = MigrateCapabilities;

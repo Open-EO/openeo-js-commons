@@ -14,6 +14,14 @@ class Utils {
 		return (typeof obj === 'object' && obj === Object(obj) && !Array.isArray(obj));
     }
 	
+	/**
+	 * Computes the size of an array (number of array elements) or object (number of key-value-pairs).
+	 * 
+	 * Returns 0 for all other data types.
+	 * 
+	 * @param {*} obj 
+	 * @returns {integer}
+	 */
 	static size(obj) {
 		if (typeof obj === 'object' && obj !== null) {
 			if (Array.isArray(obj)) {
@@ -41,15 +49,15 @@ class Utils {
     /**
      * Deep clone for JSON-compatible data.
      * 
-     * @param {*} x 
-     * @returns {*}
+     * @param {*} x - The data to clone.
+     * @returns {*} - The cloned data.
      */
     static deepClone(x) {
         return JSON.parse(JSON.stringify(x));
     }
 
 	/**
-	 * Normalize a URL (mostly handling slashes).
+	 * Normalize a URL (mostly handling leading and trailing slashes).
 	 * 
 	 * @static
 	 * @param {string} baseUrl - The URL to normalize
@@ -67,6 +75,14 @@ class Utils {
 		return url;
 	}
 
+	/**
+	 * Replaces placeholders in this format: `{var}`.
+	 * 
+	 * This can be used for the placeholders/variables in the openEO API's errors.json file.
+	 * 
+	 * @param {string} message - The string to replace the placeholders in.
+	 * @param {object} variables - A map with the placeholder names as keys and the replacement value as value.
+	 */
 	static replacePlaceholders(message, variables = {}) {
 		if (typeof message === 'string' && Utils.isObject(variables)) {
 			for(var placeholder in variables) {

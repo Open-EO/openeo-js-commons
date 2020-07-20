@@ -36,6 +36,9 @@ class Versions {
 	 * 
 	 * @static
 	 * @param {array} wkVersions - A well-known discovery document compliant to the API specification.
+	 * @param {boolean} preferProduction - Set to `false` to make no difference between production and non-production versions.
+	 * @param {string|null} minVersion - The minimum version that should be returned.
+	 * @param {string|null} maxVersion - The maximum version that should be returned.
 	 * @returns {object[]} - Gives a list that lists all compatible versions (as still API compliant objects) ordered from the most suitable to the least suitable.
 	 */
 	static findCompatible(wkVersions, preferProduction = true, minVersion = null, maxVersion = null) {
@@ -81,6 +84,17 @@ class Versions {
 		});
 	}
 
+	/**
+	 * Find the latest version from well-known discovery that applies to the specified rules.
+	 * 
+	 * This is basically the same as calling `findCompatible` and using the first element from the result.
+	 * 
+	 * @param {array} wkVersions - A well-known discovery document compliant to the API specification.
+	 * @param {boolean} preferProduction - Set to `false` to make no difference between production and non-production versions.
+	 * @param {string|null} minVersion - The minimum version that should be returned.
+	 * @param {string|null} maxVersion - The maximum version that should be returned.
+	 * @returns {object|null}
+	 */
 	static findLatest(wkVersions, preferProduction = true, minVersion = null, maxVersion = null) {
 		let versions = Versions.findCompatible(wkVersions, preferProduction, minVersion, maxVersion);
 		if (versions.length > 0) {

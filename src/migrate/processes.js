@@ -27,6 +27,9 @@ class MigrateProcesses {
                 .map(p => MigrateProcesses.convertProcessToLatestSpec(p, version))
                 .filter(p => typeof p.id === 'string');
         }
+        else {
+            response.processes = [];
+        }
 
         response.links = MigrateCommons.migrateLinks(response.links, version);
 
@@ -94,9 +97,10 @@ class MigrateProcesses {
 
         // Update parameters
         if (Array.isArray(process.parameters)) {
-            for(let i in process.parameters) {
+            for (var i = process.parameters.length-1; i >= 0; i--) {
                 let param = process.parameters[i];
                 if (!Utils.isObject(param)) {
+                    process.parameters.splice(i, 1);
                     continue;
                 }
 
@@ -173,16 +177,16 @@ function upgradeSchema(obj, version, isParam = true) {
             }
         }
 
-        // Clients SHOULD automatically set `optional` to `true`, if a default value is specified.
-        if (Versions.compare(version, "0.4.x", ">")) {
-            if (typeof obj.default !== 'undefined') {
-                obj.optional = true;
-            }
-        }
-
         // Remove the media type
         if (moveMediaType) {
             delete obj.media_type;
+        }
+    }
+
+    // Clients SHOULD automatically set `optional` to `true`, if a default value is specified.
+    if (Versions.compare(version, "0.4.x", ">")) {
+        if (typeof obj.default !== 'undefined') {
+            obj.optional = true;
         }
     }
 

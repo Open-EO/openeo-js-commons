@@ -91,6 +91,9 @@ class MigrateCollections {
                 .map(c => MigrateCollections.convertCollectionToLatestSpec(c, version))
                 .filter(c => typeof c.id === 'string');
         }
+        else {
+            response.collections = [];
+        }
 
         response.links = MigrateCommons.migrateLinks(response.links, version);
 
@@ -199,7 +202,9 @@ class MigrateCollections {
             }
             delete collection.other_properties;
 
-            collection.summaries = Utils.isObject(collection.summaries) ? collection.summaries : {};
+            if (!Utils.isObject(collection.summaries)) {
+                collection.summaries = {};
+            }
             for(let key in props) {
                 let val = props[key];
 

@@ -292,7 +292,6 @@ class MigrateCapabilities {
         for(let t in types) {
             if (!Utils.isObject(types[t])) {
                 types[t] = {};
-                continue;
             }
             if (Versions.compare(version, "0.4.x", "=")) {
                 // Remove attributes

@@ -19,9 +19,10 @@ class MigrateCommons {
 	}
 
 	static migrateDiscoveryParameters(parameters, version) {
-		if (Versions.compare(version, "1.0.0", "<=")) {
+		if (Versions.compare(version, "1.0.0-rc.2", "<=")) {
 			for(var name in parameters) {
 				if (!Utils.isObject(parameters[name])) {
+					delete parameters[name];
 					continue;
 				}
 

@@ -52,4 +52,32 @@ describe('Basic Collection Migration Tests', () => {
 		// Test that a collection following the latest spec doesn't change at all
 		expect(MigrateCollections.convertCollectionToLatestSpec(sar10, "1.0.0")).toEqual(sar10);
 	});
+
+	// MULTIPLE COLLECTIONS
+
+	test('Migrate Collections > invalid', () => {
+		// Pass no version number
+		expect(() => MigrateCollections.convertCollectionsToLatestSpec({})).toThrow();
+		expect(() => MigrateCollections.convertCollectionsToLatestSpec({}, "0.3.0")).toThrow();
+		// Pass invalid collection (no id)
+		expect(MigrateCollections.convertCollectionsToLatestSpec({}, "0.4.0")).toEqual({collections: [], links: []});
+		expect(MigrateCollections.convertCollectionsToLatestSpec({}, "1.0.0")).toEqual({collections: [], links: []});
+	});
+
+	let all04 = {
+		collections: [incomplete, api04, ex04, sar04],
+		links: []
+	};
+	let all10 = {
+		collections: [min10, api10, ex10, sar10],
+		links: []
+	};
+	test('Migrate Collections > 0.4', () => {
+		// Test that a response gets converted
+		expect(MigrateCollections.convertCollectionsToLatestSpec(all04, "0.4.0")).toEqual(all10);
+	});
+	test('Migrate Collections > 1.0', () => {
+		// Test that a response following the latest spec doesn't change at all
+		expect(MigrateCollections.convertCollectionsToLatestSpec(all10, "1.0.0")).toEqual(all10);
+	});
 });

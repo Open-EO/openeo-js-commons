@@ -53,14 +53,14 @@ describe('Utils Tests', () => {
 	});
 
 	test('normalizeUrl', () => {
-		expect(Utils.normalizeUrl("http://www.example.com")).toEqual("http://www.example.com");
-		expect(Utils.normalizeUrl("http://www.example.com/")).toEqual("http://www.example.com");
-		expect(Utils.normalizeUrl("http://www.example.com/abc/")).toEqual("http://www.example.com/abc");
-		expect(Utils.normalizeUrl("http://www.example.com/abc/index.html")).toEqual("http://www.example.com/abc/index.html");
-		expect(Utils.normalizeUrl("http://www.example.com", "/index.html")).toEqual("http://www.example.com/index.html");
-		expect(Utils.normalizeUrl("http://www.example.com/", "/index.html")).toEqual("http://www.example.com/index.html");
-		expect(Utils.normalizeUrl("http://www.example.com", "index.html")).toEqual("http://www.example.com/index.html");
-		expect(Utils.normalizeUrl("http://www.example.com/", "/abc/")).toEqual("http://www.example.com/abc");
+		expect(Utils.normalizeUrl("http://www.example.com")).toBe("http://www.example.com");
+		expect(Utils.normalizeUrl("http://www.example.com/")).toBe("http://www.example.com");
+		expect(Utils.normalizeUrl("http://www.example.com/abc/")).toBe("http://www.example.com/abc");
+		expect(Utils.normalizeUrl("http://www.example.com/abc/index.html")).toBe("http://www.example.com/abc/index.html");
+		expect(Utils.normalizeUrl("http://www.example.com", "/index.html")).toBe("http://www.example.com/index.html");
+		expect(Utils.normalizeUrl("http://www.example.com/", "/index.html")).toBe("http://www.example.com/index.html");
+		expect(Utils.normalizeUrl("http://www.example.com", "index.html")).toBe("http://www.example.com/index.html");
+		expect(Utils.normalizeUrl("http://www.example.com/", "/abc/")).toBe("http://www.example.com/abc");
 	});
 
 	test('replacePlaceholders', () => {
@@ -69,6 +69,65 @@ describe('Utils Tests', () => {
 		expect(Utils.replacePlaceholders("Eine Variable: {x}", {x: 123})).toBe("Eine Variable: 123");
 		expect(Utils.replacePlaceholders("{multiple} {vars}: {undefined}", {multiple: "Multiple", vars: "Variables", more: "Unused"})).toBe("Multiple Variables: {undefined}");
 		expect(Utils.replacePlaceholders("Eine Liste: {x}", {x: [1,2,"3"]})).toBe("Eine Liste: 1; 2; 3");
+	});
+
+	test('compareStringCaseInsensitive', () => {
+		expect(Utils.compareStringCaseInsensitive("a", "b")).toBe(-1);
+		expect(Utils.compareStringCaseInsensitive("b", "a")).toBe(1);
+		expect(Utils.compareStringCaseInsensitive("b", "B")).toBe(0);
+		expect(Utils.compareStringCaseInsensitive(1, 2)).toBe(-1);
+		expect(Utils.compareStringCaseInsensitive(10, 100)).toBe(-1);
+		expect(Utils.compareStringCaseInsensitive("10B", "100B")).toBe(-1);
+		expect(Utils.compareStringCaseInsensitive("B10", "B100")).toBe(-1);
+	});
+
+	test('prettifyString', () => {
+		class Hello {}
+		expect(Utils.prettifyString(null)).toBe("Null");
+		expect(Utils.prettifyString(true)).toBe("True");
+		expect(Utils.prettifyString(false)).toBe("False");
+
+		expect(Utils.prettifyString([])).toBe("");
+		expect(Utils.prettifyString(["ab"])).toBe("ab");
+		expect(Utils.prettifyString(["abc"])).toBe("Abc");
+		expect(Utils.prettifyString(["aBC"])).toBe("A BC");
+		expect(Utils.prettifyString(["it's", "my", "life"], " ")).toBe("It's my Life");
+		expect(Utils.prettifyString(["abc-def", "xyz"])).toBe("Abc Def; Xyz");
+
+		expect(Utils.prettifyString({})).toBe("[object Object]");
+		expect(Utils.prettifyString(new Hello())).toBe("[object Object]");
+		expect(Utils.prettifyString(123)).toBe("123");
+
+		expect(Utils.prettifyString("")).toBe("");
+		expect(Utils.prettifyString("a")).toBe("a");
+		expect(Utils.prettifyString("aB")).toBe("aB");
+		expect(Utils.prettifyString("abc")).toBe("Abc");
+		expect(Utils.prettifyString("hello-world")).toBe("Hello World");
+		expect(Utils.prettifyString("hello_world")).toBe("Hello World");
+		expect(Utils.prettifyString("helloWorld")).toBe("Hello World");
+		expect(Utils.prettifyString("Hello World")).toBe("Hello World");
+		expect(Utils.prettifyString("hello world")).toBe("Hello world");
+		expect(Utils.prettifyString("i-love-you")).toBe("I Love You");
+		expect(Utils.prettifyString("i_love_you")).toBe("I Love You");
+		expect(Utils.prettifyString("iLoveYou")).toBe("I Love You");
+		expect(Utils.prettifyString("PHP")).toBe("PHP");
+		expect(Utils.prettifyString("phpBB")).toBe("Php BB");
+	});
+
+	test('friendlyLinks', () => {
+		let href = 'http://www.openeo.org';
+		let selfLink = {href, rel: 'self', title: 'This document'};
+		let aLink = {href: 'http://a.bc', title: 'A', rel: 'a'};
+		let bLink = {href: 'http://c.de', title: 'B', rel: 'b'};
+		let unsortedLinks = [bLink, aLink];
+		expect(Utils.friendlyLinks(null)).toEqual([]);
+		expect(Utils.friendlyLinks([])).toEqual([]);
+		expect(Utils.friendlyLinks([{href}])).toEqual([{href, title: 'openeo.org'}]);
+		expect(Utils.friendlyLinks([{href, rel: 'about'}])).toEqual([{href: 'http://www.openeo.org', rel: 'about', title: 'About'}]);
+		expect(Utils.friendlyLinks([selfLink])).toEqual([]);
+		expect(Utils.friendlyLinks([selfLink], true, [])).toEqual([selfLink]);
+		expect(Utils.friendlyLinks(unsortedLinks)).toEqual([aLink, bLink]);
+		expect(Utils.friendlyLinks(unsortedLinks, false)).toEqual(unsortedLinks);
 	});
 
 });

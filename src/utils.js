@@ -111,39 +111,45 @@ class Utils {
     }
 
 	/**
-	 * Tries to make a string more readable.
+	 * Tries to make a string more readable by capitalizing it.
+	 * Only applies to words with more than two characters.
 	 * 
 	 * Supports converting from:
-	 * - Snake Case (abc_def)
-	 * - Kebab Case (abc-def)
-	 * - Camel Case (abcDef)
+	 * - Snake Case (abc_def => Abc Def)
+	 * - Kebab Case (abc-def => Abc Def)
+	 * - Camel Case (abcDef => Abc Def)
 	 * 
-	 * @param {string} str String to make readable.
+	 * Doesn't capitalize if the words are not in any of the casing formats above.
+	 * 
+	 * @param {*} strings - String(s) to make readable
+	 * @param {string} arraySep - String to separate array elements with
 	 * @returns {string}
 	 */
-    static prettifyString(str) {
-        if(Utils.isNumeric(str)) {
-            return str;
-        }
-        else if (str.length >= 2) {
-            if (str.includes('_')) {
-                // Snake case converter
-                str = str.replace(/([a-zA-Z\d])_([a-zA-Z\d])/g, '$1 $2');
-            }
-            else if (str.includes('-')) {
-                // Kebab case converter
-                str = str.replace(/([a-zA-Z\d])-([a-zA-Z\d])/g, '$1 $2');
-            }
-            else {
-                // Camelcase converter
-                str = str.replace(/([a-z])([A-Z])/g, '$1 $2');
-            }
-            // Uppercase the first letter in the first word
-            return str.charAt(0).toUpperCase() + str.substr(1);
-        }
-        else {
-            return String(str);
-        }
+    static prettifyString(strings, arraySep = '; ') {
+		if (!Array.isArray(strings)) {
+			strings = [String(strings)];
+		}
+		strings = strings.map(str => {
+			if (str.length >= 3) {
+				const replacer = (_,a,b) => a + ' ' + b.toUpperCase();
+				if (str.includes('_')) {
+					// Snake case converter
+					str = str.replace(/([a-zA-Z\d])_([a-zA-Z\d])/g, replacer);
+				}
+				else if (str.includes('-')) {
+					// Kebab case converter
+					str = str.replace(/([a-zA-Z\d])-([a-zA-Z\d])/g, replacer);
+				}
+				else {
+					// Camelcase converter
+					str = str.replace(/([a-z])([A-Z])/g, replacer);
+				}
+				// Uppercase the first letter in the first word, too.
+				return str.charAt(0).toUpperCase() + str.substr(1);
+			}
+			return str;
+		});
+		return strings.join(arraySep);	
     }
 
 	/**

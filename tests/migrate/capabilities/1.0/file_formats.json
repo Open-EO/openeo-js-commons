@@ -7,12 +7,12 @@
 			],
 			"parameters":{
 				"tiled":{
-					"type":"boolean",
+					"type":["boolean","null"],
 					"description":"This option can be used to force creation of tiled TIFF files [true]. By default [false] stripped TIFF files are created.",
 					"default":false
 				},
 				"compress":{
-					"type":"string",
+					"type":["string","null"],
 					"description":"Set the compression to use.",
 					"default":"none",
 					"enum":[
@@ -23,7 +23,7 @@
 					]
 				},
 				"jpeg_quality":{
-					"type":"integer",
+					"type":["integer","null"],
 					"description":"Set the JPEG quality when using JPEG.",
 					"minimum":1,
 					"maximum":100,
@@ -46,7 +46,7 @@
 			],
 			"parameters":{
 				"version":{
-					"type":"string",
+					"type":["string","null"],
 					"description":"Set GeoPackage version. In AUTO mode, this will be equivalent to 1.2 starting with GDAL 2.3.",
 					"enum":[
 						"auto",

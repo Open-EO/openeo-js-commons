@@ -110,6 +110,12 @@
 				"B11",
 				"B12"
 			]
+		},
+		"crs":{
+			"type":"other",
+			"values":[
+				4326
+			]
 		}
 	},
 	"sci:citation":"Copernicus Sentinel data [Year]",

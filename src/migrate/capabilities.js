@@ -1,8 +1,10 @@
 const Utils = require('../utils.js');
 const Versions = require('../versions.js');
+const MigrateCommons = require('./commons.js');
 
 const NO_VERSION = "0.0.0";
 
+/** Migrate capabilities related responses to the latest version. */
 class MigrateCapabilities {
 
     /**
@@ -43,8 +45,21 @@ class MigrateCapabilities {
         return NO_VERSION;
     }
 
-    // Always returns a copy of the input object
-    static convertCapabilitiesToLatestSpec(originalCapabilities, version = null, updateVersionNumbers = true, updateEndpointPaths = true, id = "unknown", title = "Unknown", backend_version = "Unknown") {
+    /**
+     * Converts a `GET /` response to the latest version.
+     * 
+     * Always returns a deep copy of the input object.
+     * 
+     * @param {object} response - The response to convert
+     * @param {string|null} version - Version number of the API, which the response conforms to. If `null`, tries to guess the version with `guessApiVersion()`.
+     * @param {boolean} updateVersionNumbers - Should version numbers in the response be updated?
+     * @param {boolean} updateEndpointPaths - Should the endpoint paths be updated to their recent equivalents?
+     * @param {string} id - If no id is set in the response, sets it to the value specified here. Defaults to `unknown`.
+     * @param {string} title - If no title is set in the response, sets it to the value specified here. Defaults to `Unknown`.
+     * @param {string} title - If no backend_version is set in the response, sets it to the value specified here. Defaults to `0.0.0`.
+     * @returns {object}
+     */
+    static convertCapabilitiesToLatestSpec(originalCapabilities, version = null, updateVersionNumbers = true, updateEndpointPaths = true, id = "unknown", title = "Unknown", backend_version = "0.0.0") {
         if (version === null) {
             version = this.guessApiVersion(originalCapabilities);
         }
@@ -101,21 +116,29 @@ class MigrateCapabilities {
         if (typeof capabilities.description !== 'string') {
             capabilities.description = "";
         }
-        if (!Array.isArray(capabilities.links)) {
-            capabilities.links = [];
-        }
+        capabilities.links = MigrateCommons.migrateLinks(capabilities.links, version);
 
         return capabilities;
     }
 
-    // Always returns a copy of the input object
-    static convertBillingToLatestSpec(originalBilling, version) {
+    /**
+     * Converts the billing part of the `GET /` response to the latest version.
+     * 
+     * Always returns a deep copy of the input object.
+     * 
+     * @param {object} billing - The response to convert
+     * @param {string} version - Version number of the API, which the response conforms to
+     * @returns {object}
+     */
+    static convertBillingToLatestSpec(billing, version) {
         if (Versions.compare(version, "0.3.x", "<=")) {
             throw "Migrating from API version 0.3.0 and older is not supported.";
         }
-        let billing = {};
-        if (Utils.isObject(originalBilling)) {
-            billing = Utils.deepClone(originalBilling);
+        if (Utils.isObject(billing)) {
+            billing = Utils.deepClone(billing);
+        }
+        else {
+            billing = {};
         }
 
         if (typeof billing.currency !== 'string') {
@@ -125,15 +148,24 @@ class MigrateCapabilities {
         return billing;
     }
 
-    // Always returns a copy of the input object
-    static convertEndpointsToLatestSpec(originalEndpoints, version, updatePaths = false) {
+    /**
+     * Converts the endpoints part of the `GET /` response to the latest version.
+     * 
+     * Always returns a deep copy of the input object.
+     * 
+     * @param {array} endpoints - The response to convert
+     * @param {string} version - Version number of the API, which the response conforms to
+     * @param {boolean} updatePaths - Should the endpoint paths be updated to their recent equivalents?
+     * @returns {array}
+     */
+    static convertEndpointsToLatestSpec(endpoints, version, updatePaths = false) {
         if (Versions.compare(version, "0.3.x", "<=")) {
             throw "Migrating from API version 0.3.0 and older is not supported.";
         }
-        if (!Array.isArray(originalEndpoints)) {
+        if (!Array.isArray(endpoints)) {
             return [];
         }
-        let endpoints = Utils.deepClone(originalEndpoints);
+        endpoints = Utils.deepClone(endpoints);
         // convert v0.4 endpoints to v1.0
         if (updatePaths) {
             let isV04 = Versions.compare(version, "0.4.x", "=");
@@ -194,19 +226,37 @@ class MigrateCapabilities {
         return endpoints;
     }
 
-    // Alias for convertFileFormatsToLatestSpec
-    static convertOutputFormatsToLatestSpec(originalFormats, version) {
-        return this.convertFileFormatsToLatestSpec(originalFormats, version);
+    /**
+     * Alias for `convertFileFormatsToLatestSpec()`.
+     * 
+     * @alias MigrateCapabilities.convertFileFormatsToLatestSpec
+     * @deprecated
+     * @param {object} formats - The response to convert
+     * @param {string} version - Version number of the API, which the response conforms to
+     * @returns {object}
+     */
+    static convertOutputFormatsToLatestSpec(formats, version) {
+        return this.convertFileFormatsToLatestSpec(formats, version);
     }
 
-    // Always returns a copy of the input object
-    static convertFileFormatsToLatestSpec(originalFormats, version) {
+    /**
+     * Converts a `GET /file_formats` response to the latest version.
+     * 
+     * Always returns a deep copy of the input object.
+     * 
+     * @param {object} formats - The response to convert
+     * @param {string} version - Version number of the API, which the response conforms to
+     * @returns {object}
+     */
+    static convertFileFormatsToLatestSpec(formats, version) {
         if (Versions.compare(version, "0.3.x", "<=")) {
             throw "Migrating from API version 0.3.0 and older is not supported.";
         }
-        let formats = {};
-        if (Utils.isObject(originalFormats)) {
-            formats = Utils.deepClone(originalFormats);
+        if (Utils.isObject(formats)) {
+            formats = Utils.deepClone(formats);
+        }
+        else {
+            formats = {};
         }
 
         if (Versions.compare(version, "0.4.x", "=") && Utils.isObject(formats)) {
@@ -215,37 +265,39 @@ class MigrateCapabilities {
             };
         }
 
-        if (!Utils.isObject(formats.input)) {
-            formats.input = {};
-        }
-        if (!Utils.isObject(formats.output)) {
-            formats.output = {};
-        }
+        formats.input = upgradeFileFormats(formats.input, version);
+        formats.output = upgradeFileFormats(formats.output, version);
 
         return formats;
     }
 
-    // Always returns a copy of the input object
-    static convertServiceTypesToLatestSpec(originalTypes, version) {
+    /**
+     * Converts a `GET /service_types` response to the latest version.
+     * 
+     * Always returns a deep copy of the input object.
+     * 
+     * @param {object} types - The response to convert
+     * @param {string} version - Version number of the API, which the response conforms to
+     * @returns {object}
+     */
+    static convertServiceTypesToLatestSpec(types, version) {
         if (Versions.compare(version, "0.3.x", "<=")) {
             throw "Migrating from API version 0.3.0 and older is not supported.";
         }
-        let types = {};
-        if (Utils.isObject(originalTypes)) {
-            types = Utils.deepClone(originalTypes);
+        if (!Utils.isObject(types)) {
+            return {};
         }
-        if (Versions.compare(version, "0.4.x", "=")) {
-            for(let t in types) {
-                if (!Utils.isObject(types[t])) {
-                    types[t] = {};
-                    continue;
-                }
 
+        types = Utils.deepClone(types);
+        for(let t in types) {
+            if (!Utils.isObject(types[t])) {
+                types[t] = {};
+            }
+            if (Versions.compare(version, "0.4.x", "=")) {
                 // Remove attributes
                 delete types[t].attributes;
 
                 // Rename parameters to configuration
-
                 if (Utils.isObject(types[t].parameters)) {
                     types[t].configuration = types[t].parameters;
                 }
@@ -272,19 +324,46 @@ class MigrateCapabilities {
                 }
                 delete types[t].variables;
             }
+
+            if (!Utils.isObject(types[t].configuration)) {
+                types[t].configuration = {};
+            }
+            else {
+                types[t].configuration = MigrateCommons.migrateDiscoveryParameters(types[t].configuration, version);
+            }
+
+            if (!Array.isArray(types[t].process_parameters)) {
+                types[t].process_parameters = [];
+            }
+
+            if (typeof types[t].links !== 'undefined') { // links not required, so only apply if defined anyway
+                types[t].links = MigrateCommons.migrateLinks(types[t].links, version);
+            }
         }
         return types;
     }
 
-    // Always returns a copy of the input object
-    static convertUdfRuntimesToLatestSpec(originalRuntimes, version) {
+    /**
+     * Converts a `GET /udf_runtimes` response to the latest version.
+     * 
+     * Always returns a deep copy of the input object.
+     * 
+     * @param {object} runtimes - The response to convert
+     * @param {string} version - Version number of the API, which the response conforms to
+     * @returns {object}
+     */
+    static convertUdfRuntimesToLatestSpec(runtimes, version) {
         if (Versions.compare(version, "0.3.x", "<=")) {
             throw "Migrating from API version 0.3.0 and older is not supported.";
         }
-        let runtimes = Utils.deepClone(originalRuntimes);
+        if (!Utils.isObject(runtimes)) {
+            return {};
+        }
+
+        runtimes = Utils.deepClone(runtimes);
+        for(let r in runtimes) {
         // Nothing to do, was not supported in 0.3 and nothing changed in 0.4.
-        if (Versions.compare(version, "0.4.x", "=")) {
-            for(let r in runtimes) {
+            if (Versions.compare(version, "0.4.x", "=")) {
                 if (!Utils.isObject(runtimes[r])) {
                     delete runtimes[r];
                     continue;
@@ -295,10 +374,53 @@ class MigrateCapabilities {
                     runtimes[r].description = "";
                 }
             }
+
+            if (typeof runtimes[r].type !== 'string') {
+                if (typeof runtimes[r].docker === 'string') {
+                    runtimes[r].type = 'docker';
+                }
+                else {
+                    runtimes[r].type = 'language';
+                }
+            }
+
+            if (typeof runtimes[r].links !== 'undefined') { // links not required, so only apply if defined anyway
+                runtimes[r].links = MigrateCommons.migrateLinks(runtimes[r].links, version);
+            }
         }
+
         return runtimes;
     }
 
+}
+
+const GIS_DATA_TYPES = ['raster', 'vector', 'table', 'other'];
+
+function upgradeFileFormats(formats, version) {
+    if (!Utils.isObject(formats)) {
+        formats = {};
+    }
+    for(let id in formats) {
+        if (!Utils.isObject(formats[id].parameters)) {
+            formats[id].parameters = {};
+        }
+        else {
+            formats[id].parameters = MigrateCommons.migrateDiscoveryParameters(formats[id].parameters, version);
+        }
+
+        // Can be empty: https://github.com/Open-EO/openeo-api/issues/325
+        if (!Array.isArray(formats[id].gis_data_types)) {
+            formats[id].gis_data_types = [];
+        }
+        else {
+            formats[id].gis_data_types = formats[id].gis_data_types.filter(t => GIS_DATA_TYPES.includes(t));
+        }
+
+        if (typeof formats[id].links !== 'undefined') { // links not required, so only apply if defined anyway
+            formats[id].links = MigrateCommons.migrateLinks(formats[id].links, version);
+        }
+    }
+    return formats;
 }
 
 module.exports = MigrateCapabilities;

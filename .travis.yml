@@ -16,7 +16,7 @@ script:
   - npm run test
   - npm run test_node
 # Build
-#  - npm run build # Doesn't stop at the moment due to webpack-bundle-analyzer => build would fail
+  - npm run build
 # Generate docs
   - npm run docs
 # Deploy 

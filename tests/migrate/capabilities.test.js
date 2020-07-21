@@ -27,10 +27,13 @@ describe('Basic Capabilities Migration Tests', () =>  {
 	});
 -
 	test('Migrate Capabilities', () =>  {
+		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec(null)).toEqual({});
 		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec({})).toEqual({});
 		expect(() => MigrateCapabilities.convertCapabilitiesToLatestSpec({}, "0.3.2")).toThrow();
 		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec({}, "0.4.1")).toEqual(c10empty);
 		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec({}, "1.0.0")).toEqual(c10empty);
+		// Test for changed default value of production property
+		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec({}, "1.0.0-rc.2")).toEqual(Object.assign({}, c10empty, {production: true}));
 		// Handle invalid version numbers
 		expect(MigrateCapabilities.convertCapabilitiesToLatestSpec({api_version: "foo"}, null, false)).toEqual({});
 		// Test that 0.4 capabilities get converted without setting defaults
@@ -60,6 +63,7 @@ describe('Basic Capabilities Migration Tests', () =>  {
 	test('Migrate Endpoints', () => {
 		expect(() => MigrateCapabilities.convertEndpointsToLatestSpec([])).toThrow();
 		expect(() => MigrateCapabilities.convertEndpointsToLatestSpec([], "0.3.2")).toThrow();
+		expect(MigrateCapabilities.convertEndpointsToLatestSpec(null, "0.4.0")).toEqual([]);
 		expect(MigrateCapabilities.convertEndpointsToLatestSpec([], "0.4.0")).toEqual([]);
 		expect(MigrateCapabilities.convertEndpointsToLatestSpec([], "1.0.0")).toEqual([]);
 		// Test that 0.4 data gets converted
@@ -79,8 +83,15 @@ describe('Basic Capabilities Migration Tests', () =>  {
 	test('Migrate File Formats', () => {
 		expect(() => MigrateCapabilities.convertFileFormatsToLatestSpec({})).toThrow();
 		expect(() => MigrateCapabilities.convertFileFormatsToLatestSpec({}, "0.3.2")).toThrow();
+		expect(MigrateCapabilities.convertFileFormatsToLatestSpec(null, "0.4.0")).toEqual(ff10_empty);
 		expect(MigrateCapabilities.convertFileFormatsToLatestSpec({}, "0.4.0")).toEqual(ff10_empty);
 		expect(MigrateCapabilities.convertFileFormatsToLatestSpec({}, "1.0.0")).toEqual(ff10_empty);
+		expect(MigrateCapabilities.convertFileFormatsToLatestSpec({input: {PNG: {}}}, "1.0.0")).toEqual({
+			input: {
+				PNG: { gis_data_types: [], parameters: {} }
+			},
+			output: {}
+		});
 		// Test that 0.4 service types gets converted
 		expect(MigrateCapabilities.convertFileFormatsToLatestSpec(ff04, "0.4.0")).toEqual(ff10);
 		// Test that service types following the latest spec doesn't change at all
@@ -95,15 +106,18 @@ describe('Basic Capabilities Migration Tests', () =>  {
 
 	const st04 = require('./capabilities/0.4/service_types.json');
 	const st10 = require('./capabilities/1.0/service_types.json');
+	const st10rc2 = require('./capabilities/1.0/service_types-rc2.json');
 	test('Migrate Service Types', () =>  {
 		expect(() => MigrateCapabilities.convertServiceTypesToLatestSpec({})).toThrow();
 		expect(() => MigrateCapabilities.convertServiceTypesToLatestSpec({}, "0.3.2")).toThrow();
+		expect(MigrateCapabilities.convertServiceTypesToLatestSpec(null, "0.4.0")).toEqual({});
 		expect(MigrateCapabilities.convertServiceTypesToLatestSpec({}, "0.4.0")).toEqual({});
 		expect(MigrateCapabilities.convertServiceTypesToLatestSpec({}, "1.0.0")).toEqual({});
 		// Handle invalid service types
-		expect(MigrateCapabilities.convertServiceTypesToLatestSpec({OGC: null}, "0.4.0")).toEqual({OGC: {}});
-		// Test that 0.4 service types gets converted
+		expect(MigrateCapabilities.convertServiceTypesToLatestSpec({OGC: null}, "0.4.0")).toEqual({OGC: {configuration: {}, process_parameters: []}});
+		// Test that legacy service types get converted
 		expect(MigrateCapabilities.convertServiceTypesToLatestSpec(st04, "0.4.0")).toEqual(st10);
+		expect(MigrateCapabilities.convertServiceTypesToLatestSpec(st10rc2, "1.0.0-rc.2")).toEqual(st10);
 		// Test that service types following the latest spec doesn't change at all
 		expect(MigrateCapabilities.convertServiceTypesToLatestSpec(st10, "1.0.0")).toEqual(st10);
 	});
@@ -113,6 +127,7 @@ describe('Basic Capabilities Migration Tests', () =>  {
 	test('Migrate UDF Runtimes', () =>  {
 		expect(() => MigrateCapabilities.convertUdfRuntimesToLatestSpec({})).toThrow();
 		expect(() => MigrateCapabilities.convertUdfRuntimesToLatestSpec({}, "0.3.2")).toThrow();
+		expect(MigrateCapabilities.convertUdfRuntimesToLatestSpec(null, "0.4.0")).toEqual({});
 		expect(MigrateCapabilities.convertUdfRuntimesToLatestSpec({}, "0.4.0")).toEqual({});
 		expect(MigrateCapabilities.convertUdfRuntimesToLatestSpec({}, "1.0.0")).toEqual({});
 		// Handle invalid runtimes

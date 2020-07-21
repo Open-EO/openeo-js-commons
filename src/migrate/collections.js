@@ -1,5 +1,6 @@
 const Utils = require('../utils.js');
 const Versions = require('../versions.js');
+const MigrateCommons = require('./commons.js');
 
 const extMap = {
     "cube": "datacube",
@@ -57,9 +58,57 @@ const moveToRoot = [
     'sci:citation'
 ];
 
+const DIMENSION_TYPES = [
+    'spatial',
+    'temporal',
+    'bands',
+    'other'
+];
+
+
+/** Migrate Collections related responses to the latest version. */
 class MigrateCollections {
 
-    // Always returns a copy of the input collection object
+    /**
+     * Converts a `GET /collections` response to the latest version.
+     * 
+     * Always returns a deep copy of the input object.
+     * 
+     * @param {object} response - The response to convert
+     * @param {string} version - Version number of the API, which the response conforms to
+     * @returns {object}
+     */
+    static convertCollectionsToLatestSpec(response, version) {
+        if (Versions.compare(version, "0.3.x", "<=")) {
+            throw "Migrating from API version 0.3.0 and older is not supported.";
+        }
+
+        // Make sure we don't alter the original object
+        response = Utils.deepClone(response);
+
+        if (Array.isArray(response.collections)) {
+            response.collections = response.collections
+                .map(c => MigrateCollections.convertCollectionToLatestSpec(c, version))
+                .filter(c => typeof c.id === 'string');
+        }
+        else {
+            response.collections = [];
+        }
+
+        response.links = MigrateCommons.migrateLinks(response.links, version);
+
+        return response;
+    }
+
+    /**
+     * Converts a single collection to the latest version.
+     * 
+     * Always returns a deep copy of the input object.
+     * 
+     * @param {object} process - The collection to convert
+     * @param {string} version - Version number of the API, which the collection conforms to
+     * @returns {object}
+     */
     static convertCollectionToLatestSpec(originalCollection, version) {
         if (Versions.compare(version, "0.3.x", "<=")) {
             throw "Migrating from API version 0.3.0 and older is not supported.";
@@ -153,7 +202,9 @@ class MigrateCollections {
             }
             delete collection.other_properties;
 
-            collection.summaries = Utils.isObject(collection.summaries) ? collection.summaries : {};
+            if (!Utils.isObject(collection.summaries)) {
+                collection.summaries = {};
+            }
             for(let key in props) {
                 let val = props[key];
 
@@ -204,16 +255,16 @@ class MigrateCollections {
         if (!Utils.isObject(collection['cube:dimensions'])) {
             collection['cube:dimensions'] = {};
         }
+        else {
+            for(var name in collection['cube:dimensions']) {
+                if (Utils.isObject(collection['cube:dimensions'][name]) && !DIMENSION_TYPES.includes(collection['cube:dimensions'][name].type)) {
+                    collection['cube:dimensions'][name].type = 'other';
+                }
+            }
+        }
 
         // Fix links
-        if (!Array.isArray(collection.links)) {
-            collection.links = [];
-        }
-        // Add missing rel type
-        collection.links = collection.links.map(l => {
-            l.rel = typeof l.rel === 'string' ? l.rel : "related";
-            return l;
-        });
+        collection.links = MigrateCommons.migrateLinks(collection.links);
 
         // Fix stac_extensions
         var extensions = Array.isArray(collection.stac_extensions) ? collection.stac_extensions : [];

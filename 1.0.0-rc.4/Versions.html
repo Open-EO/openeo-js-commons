@@ -361,7 +361,7 @@
     
 
     
-    <h4 class="name" id=".findCompatible"><span class="type-signature">(static) </span>findCompatible<span class="signature">(wkVersions)</span><span class="type-signature"> &rarr; {Array.&lt;object>}</span></h4>
+    <h4 class="name" id=".findCompatible"><span class="type-signature">(static) </span>findCompatible<span class="signature">(wkVersions, preferProduction, minVersion, maxVersion)</span><span class="type-signature"> &rarr; {Array.&lt;object>}</span></h4>
     
 
     
@@ -395,6 +395,8 @@
         
 
         
+        <th>Default</th>
+        
 
         <th class="last">Description</th>
     </tr>
@@ -420,8 +422,105 @@
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last">A well-known discovery document compliant to the API specification.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>preferProduction</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last">Set to `false` to make no difference between production and non-production versions.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>minVersion</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">null</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+
+            <td class="description last">The minimum version that should be returned.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxVersion</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">null</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+
+            <td class="description last">The maximum version that should be returned.</td>
         </tr>
 
     
@@ -462,7 +561,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="versions.js.html">versions.js</a>, <a href="versions.js.html#line41">line 41</a>
+        <a href="versions.js.html">versions.js</a>, <a href="versions.js.html#line44">line 44</a>
     </li></ul></dd>
     
 
@@ -503,6 +602,265 @@
     <dd>
         
 <span class="param-type">Array.&lt;object></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".findLatest"><span class="type-signature">(static) </span>findLatest<span class="signature">(wkVersions, preferProduction, minVersion, maxVersion)</span><span class="type-signature"> &rarr; {object|null}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Find the latest version from well-known discovery that applies to the specified rules.
+
+This is basically the same as calling `findCompatible` and using the first element from the result.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>wkVersions</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">A well-known discovery document compliant to the API specification.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>preferProduction</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last">Set to `false` to make no difference between production and non-production versions.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>minVersion</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">null</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+
+            <td class="description last">The minimum version that should be returned.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxVersion</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">null</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+
+            <td class="description last">The maximum version that should be returned.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="versions.js.html">versions.js</a>, <a href="versions.js.html#line98">line 98</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+|
+
+<span class="param-type">null</span>
 
 
     </dd>
@@ -683,7 +1041,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Mon Jul 20 2020 18:03:34 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Tue Jul 21 2020 10:56:29 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

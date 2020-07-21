@@ -209,7 +209,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">The data to clone.</td>
         </tr>
 
     
@@ -250,7 +250,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils.js.html">utils.js</a>, <a href="utils.js.html#line47">line 47</a>
+        <a href="utils.js.html">utils.js</a>, <a href="utils.js.html#line55">line 55</a>
     </li></ul></dd>
     
 
@@ -278,6 +278,10 @@
 <h5>Returns:</h5>
 
         
+<div class="param-desc">
+    - The cloned data.
+</div>
+
 
 
 <dl>
@@ -407,7 +411,7 @@ Numeric is every string with numeric data or a number, excluding NaN and finite 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils.js.html">utils.js</a>, <a href="utils.js.html#line37">line 37</a>
+        <a href="utils.js.html">utils.js</a>, <a href="utils.js.html#line45">line 45</a>
     </li></ul></dd>
     
 
@@ -635,7 +639,7 @@ This function only returns `true` for real objects and not for arrays, `null` or
 
 
 <div class="description">
-    Normalize a URL (mostly handling slashes).
+    Normalize a URL (mostly handling leading and trailing slashes).
 </div>
 
 
@@ -763,7 +767,7 @@ This function only returns `true` for real objects and not for arrays, `null` or
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils.js.html">utils.js</a>, <a href="utils.js.html#line59">line 59</a>
+        <a href="utils.js.html">utils.js</a>, <a href="utils.js.html#line67">line 67</a>
     </li></ul></dd>
     
 
@@ -816,6 +820,325 @@ This function only returns `true` for real objects and not for arrays, `null` or
 
 
         
+            
+
+    
+
+    
+    <h4 class="name" id=".replacePlaceholders"><span class="type-signature">(static) </span>replacePlaceholders<span class="signature">(message, variables)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Replaces placeholders in this format: `{var}`.
+
+This can be used for the placeholders/variables in the openEO API's errors.json file.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>message</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The string to replace the placeholders in.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>variables</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A map with the placeholder names as keys and the replacement value as value.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="utils.js.html">utils.js</a>, <a href="utils.js.html#line86">line 86</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".size"><span class="type-signature">(static) </span>size<span class="signature">(obj)</span><span class="type-signature"> &rarr; {integer}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Computes the size of an array (number of array elements) or object (number of key-value-pairs).
+
+Returns 0 for all other data types.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>obj</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="utils.js.html">utils.js</a>, <a href="utils.js.html#line25">line 25</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">integer</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
     
 
     
@@ -837,7 +1160,7 @@ This function only returns `true` for real objects and not for arrays, `null` or
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Mon Jul 20 2020 18:03:34 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Tue Jul 21 2020 10:56:29 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

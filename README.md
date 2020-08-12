@@ -21,6 +21,8 @@ The [draft branch](https://github.com/Open-EO/openeo-api/tree/draft) is where ac
     - UDF Runtimes
 - Back-end feature detection
 - Validate, compare and prioritize version numbers (e.g. for well-known discovery)
+- Process specification parsing utilities
+- Other Utils
 
 **Note:** 
 - Process graph parsing has been moved to [openeo-js-processgraphs](https://github.com/Open-EO/openeo-js-processgraphs).

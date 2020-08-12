@@ -177,10 +177,9 @@ class MigrateCollections {
                             max: val.extent[1]
                         };
                     }
-                    else { // val.value is an array
-                        let is2dArray = val.values.filter(v => !Array.isArray(v)).length === 0;
-                        if (is2dArray) {
-                            if (val.values.length < 2) {
+                    else { // val.values is an array
+                        if (val.values.findIndex(v => !Array.isArray(v)) === -1) {
+                            if (val.values.length <= 1) {
                                 props[key] = val.values[0];
                             }
                             else {

@@ -30,10 +30,10 @@ class MigrateCapabilities {
         }
         // Now we are really guessing
         else if (Array.isArray(capabilities.endpoints)) {
-            if (capabilities.endpoints.filter(e => e.path === '/file_formats' || e.path === '/conformance' || e.path === '/files').length > 0) {
+            if (capabilities.endpoints.find(e => e.path === '/file_formats' || e.path === '/conformance' || e.path === '/files')) {
                 return "1.0.0";
             }
-            else if (capabilities.endpoints.filter(e => e.path === '/output_formats' || e.path === '/files/{user_id}').length > 0) {
+            else if (capabilities.endpoints.find(e => e.path === '/output_formats' || e.path === '/files/{user_id}')) {
                 return "0.4.2";
             }
             else if (!capabilities.backend_version && !capabilities.title && !capabilities.description && !capabilities.links) {

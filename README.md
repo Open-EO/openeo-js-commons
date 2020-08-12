@@ -2,13 +2,13 @@
 
 A set of common JavaScript functionalities for [openEO](http://openeo.org).
 
-The [master branch](https://github.com/Open-EO/openeo-api/tree/master) is the 'stable' version of library, which is currently version **1.0.0**.
+The [master branch](https://github.com/Open-EO/openeo-api/tree/master) is the 'stable' version of library, which is currently version **1.1.0**.
 The [draft branch](https://github.com/Open-EO/openeo-api/tree/draft) is where active development takes place.
 
 [![Build Status](https://travis-ci.org/Open-EO/openeo-js-commons.svg?branch=master)](https://travis-ci.org/Open-EO/openeo-js-commons)
 ![Dependencies](https://img.shields.io/librariesio/release/npm/@openeo/js-commons)
-![Minified Size](https://img.shields.io/bundlephobia/min/@openeo/js-commons/1.0.0)
-![Minzipped Size](https://img.shields.io/bundlephobia/minzip/@openeo/js-commons/1.0.0)
+![Minified Size](https://img.shields.io/bundlephobia/min/@openeo/js-commons/1.1.0)
+![Minzipped Size](https://img.shields.io/bundlephobia/minzip/@openeo/js-commons/1.1.0)
 ![Supported API Versions](https://img.shields.io/github/package-json/apiVersions/Open-Eo/openeo-js-commons/master)
 
 ## Features
@@ -40,4 +40,4 @@ In a web environment you can include the library as follows:
 <script src="https://cdn.jsdelivr.net/npm/@openeo/js-commons@1/dist/main.min.js"></script>
 ```
 
-More information can be found in the [**JS commons documentation**](https://open-eo.github.io/openeo-js-commons/1.0.0/).
+More information can be found in the [**JS commons documentation**](https://open-eo.github.io/openeo-js-commons/1.1.0/).

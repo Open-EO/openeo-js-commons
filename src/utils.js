@@ -1,4 +1,4 @@
-var _isEqual = require('lodash.isequal');
+var equal = require('fast-deep-equal/es6');
 
 
 /**
@@ -29,7 +29,7 @@ class Utils {
 	 * @returns {boolean} - Returns true if the values are equivalent, else false.
 	 */
 	static equals(x, y) {
-		return _isEqual(x, y);
+		return equal(x, y);
 	}
 
 	/**

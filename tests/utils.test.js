@@ -45,7 +45,7 @@ describe('Utils Tests', () => {
 	});
 
 	test('equals', () => {
-		// Just a basic set of tests, is better tested in lodash
+		// Just a basic set of tests, is better tested in the dependency
 		expect(Utils.equals([], [])).toBeTruthy();
 		expect(Utils.equals([123], [123])).toBeTruthy();
 		expect(Utils.equals([123, [1,2,3]], [123, [1,2,3]])).toBeTruthy();

@@ -113,11 +113,21 @@ class Utils {
 	/**
 	 * Creates a duplicate-free version of an array.
 	 * 
-	 * @param {array} arr 
+	 * If useEquals is set to true, uses the `Utils.equals` function for comparison instead of 
+	 * the JS === operator. Thus, if the array contains objects, you likely want to set 
+	 * `useEquals` to `true`.
+	 * 
+	 * @param {array} array
+	 * @param {boolean} useEquals
 	 * @returns {array}
 	 */
-	static unique(arr) {
-		return [...new Set(arr)];
+	static unique(array, useEquals = false) {
+		if (useEquals) {
+			return array.filter((s1, pos, arr) => arr.findIndex(s2 => Utils.equals(s1, s2)) === pos);
+		}
+		else {
+			return [...new Set(array)];
+		}
 	}
 	
 	/**

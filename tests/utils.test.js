@@ -38,10 +38,14 @@ describe('Utils Tests', () => {
 	});
 
 	test('unique', () => {
+		let a = "a";
+		let b = "b";
 		expect(Utils.unique([])).toEqual([]);
 		expect(Utils.unique([123, 123])).toEqual([123]);
 		expect(Utils.unique([123, "123"])).toEqual([123, "123"]);
 		expect(Utils.unique(["a", "a", "b", "a"])).toEqual(["a", "b"]);
+		expect(Utils.unique([{a}, {b}, {a}])).toEqual([{a}, {b}, {a}]);
+		expect(Utils.unique([{a}, {b}, {a}], true)).toEqual([{a}, {b}]);
 	});
 
 	test('equals', () => {

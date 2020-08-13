@@ -37,6 +37,65 @@ describe('Utils Tests', () => {
 		expect(Utils.isNumeric(1e+10)).toBe(true);
 	});
 
+	test('unique', () => {
+		expect(Utils.unique([])).toEqual([]);
+		expect(Utils.unique([123, 123])).toEqual([123]);
+		expect(Utils.unique([123, "123"])).toEqual([123, "123"]);
+		expect(Utils.unique(["a", "a", "b", "a"])).toEqual(["a", "b"]);
+	});
+
+	test('equals', () => {
+		// Just a basic set of tests, is better tested in the dependency
+		expect(Utils.equals([], [])).toBeTruthy();
+		expect(Utils.equals([123], [123])).toBeTruthy();
+		expect(Utils.equals([123, [1,2,3]], [123, [1,2,3]])).toBeTruthy();
+		expect(Utils.equals([123, [1,2,3,4]], [123, [1,2,3]])).toBeFalsy();
+		expect(Utils.equals(1, true)).toBeFalsy();
+		expect(Utils.equals(0, null)).toBeFalsy();
+		expect(Utils.equals({a:"a"}, {a:"a"})).toBeTruthy();
+		expect(Utils.equals({a:"a"}, {a:"b"})).toBeFalsy();
+	});
+
+	let obj = {
+		a: {id: "a"},
+		b: {id: "b"},
+		c: {id: "e"}
+	};
+	let obj2 = {
+		a: "a",
+		b: "b",
+		c: "e"
+	};
+	test('mapObject', () => {
+		expect(Utils.mapObject(obj, o => o.id)).toEqual(["a", "b", "e"]);
+	});
+
+	test('mapObjectValues', () => {
+		expect(Utils.mapObjectValues(obj, o => o.id)).toEqual(obj2);
+	});
+
+	test('omitFromObject', () => {
+		expect(Utils.omitFromObject(null, "a")).toEqual({});
+		expect(Utils.omitFromObject(obj2, "a")).toEqual({
+			b: "b",
+			c: "e"
+		});
+		expect(Utils.omitFromObject(obj2, ["a", "b"])).toEqual({
+			c: "e"
+		});
+	});
+
+	test('pickFromObject', () => {
+		expect(Utils.pickFromObject(null, "a")).toEqual({});
+		expect(Utils.pickFromObject(obj2, "a")).toEqual({
+			a: "a"
+		});
+		expect(Utils.pickFromObject(obj2, ["a", "b"])).toEqual({
+			a: "a",
+			b: "b"
+		});
+	});
+
 	test('deepClone', () => {
 		expect(Utils.deepClone(null)).toEqual(null); // null
 		expect(Utils.deepClone([])).toEqual([]); // array

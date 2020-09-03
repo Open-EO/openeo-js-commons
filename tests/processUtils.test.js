@@ -276,6 +276,38 @@ describe('ProcessProcessUtils Tests', () => {
 				}
 			]
 		})).toThrow();
+
+		let lcParams = [
+			{
+				"name": "value",
+				"description": "The property value to be checked against.",
+				"schema": {
+					"description": "Any data type."
+				}
+			}
+		];
+		let lc = {
+			"name": "properties",
+			"description": "",
+			"schema": [
+				{
+					"type": "object",
+					"subtype": "metadata-filter",
+					"description": "",
+					"additionalProperties": {
+						"type": "object",
+						"subtype": "process-graph",
+						"parameters": lcParams
+					}
+				},
+				{
+					"title": "No filter",
+					"description": "Don't filter by metadata properties.",
+					"type": "null"
+				}
+			]
+		};
+		expect(ProcessUtils.getCallbackParameters(lc, ['eo:cloud_cover'])).toEqual(lcParams);
 	});
 
 

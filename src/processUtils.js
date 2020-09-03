@@ -74,12 +74,18 @@ class ProcessUtils {
 	 * @returns {array}
 	 * @throws {Error}
 	 */
-	static getCallbackParameters(processParameter) {
+	static getCallbackParameters(processParameter, keyPath = []) {
 		if (!Utils.isObject(processParameter) || !processParameter.schema) {
 			return [];
 		}
 
 		let schemas = ProcessUtils.normalizeJsonSchema(processParameter.schema);
+		let key;
+		while(key = keyPath.shift()) { // jshint ignore:line
+			schemas = schemas.map(schema => ProcessUtils.normalizeJsonSchema(ProcessUtils.getElementJsonSchema(schema, key))); // jshint ignore:line
+			schemas = schemas.concat(...schemas);
+		}
+
 
 		let cbParams = [];
 		for(let schema of schemas) {
@@ -102,13 +108,13 @@ class ProcessUtils {
 	 * @returns {array}
 	 * @throws {Error}
 	 */
-	static getCallbackParametersForProcess(process, parameterName) {
+	static getCallbackParametersForProcess(process, parameterName, path = []) {
 		if (!Utils.isObject(process) || !Array.isArray(process.parameters)) {
 			return [];
 		}
 
 		let param = process.parameters.find(p => p.name === parameterName);
-		return ProcessUtils.getCallbackParameters(param);
+		return ProcessUtils.getCallbackParameters(param, path);
 	}
 
 	/**

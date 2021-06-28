@@ -2,8 +2,12 @@
 const MigrateCapabilities = require('./migrate/capabilities');
 const MigrateCollections = require('./migrate/collections');
 const MigrateProcesses = require('./migrate/processes');
-// Others
+// Processes
+const ProcessDataType = require('./processDataType');
+const ProcessParameter = require('./processParameter');
+const ProcessSchema = require('./processSchema');
 const ProcessUtils = require('./processUtils');
+// Others
 const Versions = require('./versions');
 const Utils = require('./utils');
 
@@ -11,6 +15,9 @@ module.exports = {
 	MigrateCapabilities,
 	MigrateCollections,
 	MigrateProcesses,
+	ProcessDataType,
+	ProcessParameter,
+	ProcessSchema,
 	ProcessUtils,
 	Versions,
 	Utils,

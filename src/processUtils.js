@@ -1,4 +1,4 @@
-const Utils = require('./utils.js');
+const Utils = require('./utils');
 
 /**
  * Utilities to parse process specs and JSON schemas.

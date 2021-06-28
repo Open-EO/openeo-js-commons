@@ -21,6 +21,13 @@ describe('Utils Tests', () => {
 		expect(Utils.size([])).toBe(0);
 		expect(Utils.size([1,2,3])).toBe(3);
 	});
+	test('hasText', () => {
+		expect(Utils.hasText("")).toBe(false);
+		expect(Utils.hasText(null)).toBe(false);
+		expect(Utils.hasText(123)).toBe(false);
+		expect(Utils.hasText("123")).toBe(true);
+		expect(Utils.hasText(" ")).toBe(true);
+	});
 
 	test('isNumeric', () => {
 		expect(Utils.isNumeric(null)).toBe(false);

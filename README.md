@@ -2,12 +2,12 @@
 
 A set of common JavaScript functionalities for [openEO](http://openeo.org).
 
-The [master branch](https://github.com/Open-EO/openeo-api/tree/master) is the 'stable' version of library, which is currently version **1.2.0**.
+The [master branch](https://github.com/Open-EO/openeo-api/tree/master) is the 'stable' version of library, which is currently version **1.3.0**.
 The [draft branch](https://github.com/Open-EO/openeo-api/tree/draft) is where active development takes place.
 
 ![Dependencies](https://img.shields.io/librariesio/release/npm/@openeo/js-commons)
-![Minified Size](https://img.shields.io/bundlephobia/min/@openeo/js-commons/1.2.0)
-![Minzipped Size](https://img.shields.io/bundlephobia/minzip/@openeo/js-commons/1.2.0)
+![Minified Size](https://img.shields.io/bundlephobia/min/@openeo/js-commons/1.3.0)
+![Minzipped Size](https://img.shields.io/bundlephobia/minzip/@openeo/js-commons/1.3.0)
 ![Supported API Versions](https://img.shields.io/github/package-json/apiVersions/Open-Eo/openeo-js-commons/master)
 ![JS Commons Tests](https://github.com/Open-EO/openeo-js-commons/workflows/JS%20Commons%20Tests/badge.svg)
 
@@ -40,4 +40,4 @@ In a web environment you can include the library as follows:
 <script src="https://cdn.jsdelivr.net/npm/@openeo/js-commons@1/dist/main.min.js"></script>
 ```
 
-More information can be found in the [**JS commons documentation**](https://open-eo.github.io/openeo-js-commons/1.2.0/).
+More information can be found in the [**JS commons documentation**](https://open-eo.github.io/openeo-js-commons/1.3.0/).

@@ -26,9 +26,15 @@ class ProcessSchema {
 			this.unspecified = false;
 			this.schemas = ProcessUtils.normalizeJsonSchema(schema, true).map(s => new ProcessDataType(s, this, defaultValue));
 
-			let defaults = this.schemas.filter(s => typeof s.default() !== 'undefined');
-			if (defaults.length === 1) {
-				this.default = defaults[0].default();
+			// Find and assign the default value from sub-schemas if no defaultValue was given
+			if (typeof defaultValue === 'undefined') {
+				let defaults = this.schemas
+					.map(s => s.default())
+					.filter(d => typeof d !== 'undefined');
+				this.default = defaults[0];
+			}
+			else {
+				this.default = defaultValue;
 			}
 		}
 
@@ -53,7 +59,7 @@ class ProcessSchema {
 	 * @returns {boolean}
 	 */
 	isEditable() {
-		return this.unspecified || this.schemas.filter(s => s.isEditable() && !s.isNull()).length > 0;
+		return (this.unspecified || this.schemas.filter(s => s.isEditable() && !s.isNull()).length > 0);
 	}
 
 	/**
@@ -112,24 +118,26 @@ class ProcessSchema {
 	}
 
 	/**
-	 * Returns a set of all supported distinct data types.
+	 * Returns a set of all supported distinct data types (or 'any').
+	 * 
+	 * By default, `null` is not included in the list of data types.
+	 * Setting `includeNull` to `true` to include `null` in the list.
 	 * 
 	 * Setting `native` to `true` will only consider native JSON data types and "any".
 	 * Otherwise, subtypes will also be considered.
-	 * 
-	 * Setting `includeNull` to `true` will ignore the data type `null` and only return other data types.
 	 * 
 	 * @param {boolean} [includeNull=false]
 	 * @param {boolean} [native=false]
 	 * @returns {array<string>}
 	 */
 	dataTypes(includeNull = false, native = false) {
-		var types = this.schemas.map(s => s.dataType(native));
-		types = types.filter((v, i, a) => a.indexOf(v) === i); // Return each type only once
-		if (!includeNull) {
-			types = types.filter(s => s !== 'null');
+		var types = this.schemas
+			.map(s => s.dataType(native))
+			.filter((v, i, a) => a.indexOf(v) === i); // Return each type only once
+		if (types.length === 0 || types.includes('any')) {
+			return ['any'];
 		}
-		return types;
+		return includeNull ? types : types.filter(s => s !== 'null');
 	}
 
 	/**
@@ -138,7 +146,7 @@ class ProcessSchema {
 	 * @returns {boolean}
 	 */
 	nullable() {
-		return this.schemas.filter(s => s.isNull()).length > 0;
+		return (this.unspecified || this.schemas.filter(s => s.nullable()).length > 0);
 	}
 
 }

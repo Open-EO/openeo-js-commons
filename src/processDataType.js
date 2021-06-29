@@ -16,7 +16,7 @@ class ProcessDataType {
 	 */
 	constructor(schema, parent = null, defaultValue = undefined) {
 		this.schema = schema;
-		if (typeof this.schema.default === 'undefined' && typeof defaultValue !== 'undefined') {
+		if (typeof this.schema.default === 'undefined') {
 			this.schema.default = defaultValue;
 		}
 		this.parent = parent;
@@ -28,7 +28,16 @@ class ProcessDataType {
 	 * @returns {object}
 	 */
 	toJSON() {
-		return this.schema;
+		return Object.assign({}, this.schema, {default: this.default()});
+	}
+
+	/**
+	 * Checks whether the data type is only `null`.
+	 * 
+	 * @returns {boolean}
+	 */
+	isAny() {
+		return this.dataType() === 'any';
 	}
 
 	/**
@@ -38,6 +47,15 @@ class ProcessDataType {
 	 */
 	isNull() {
 		return this.schema.type === 'null';
+	}
+
+	/**
+	 * Checks whether the data type allows `null`.
+	 * 
+	 * @returns {boolean}
+	 */
+	nullable() {
+		return this.isNull() || this.isAny();
 	}
 
 	/**
@@ -60,10 +78,12 @@ class ProcessDataType {
 	 * - native data type
 	 * - "any"
 	 * 
+	 * @param {boolean} [native=false] - Set to true to only return the native data type.
 	 * @returns {string}
 	 */
-	dataType() {
-		return  this.schema.subtype || this.schema.type || "any";
+	dataType(native = false) {
+		let nativeType = this.schema.type || "any";
+		return native ? nativeType : (this.schema.subtype || nativeType);
 	}
 
 	/**
@@ -74,7 +94,7 @@ class ProcessDataType {
 	 * @returns {string}
 	 */
 	nativeDataType() {
-		return this.schema.type || "any";
+		return this.dataType(true);
 	}
 
 	/**
@@ -103,7 +123,7 @@ class ProcessDataType {
 	 * @returns {array<object>}
 	 */
 	getCallbackParameters() {
-		return this.schema.parameters;
+		return Array.isArray(this.schema.parameters) ? this.schema.parameters : [];
 	}
 
 	/**

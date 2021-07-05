@@ -1,6 +1,5 @@
 var equal = require('fast-deep-equal/es6');
 
-
 /**
  * General utilities
  * 
@@ -19,6 +18,16 @@ class Utils {
 	 */
 	static isObject(obj) {
 		return (typeof obj === 'object' && obj === Object(obj) && !Array.isArray(obj));
+	}
+
+	/**
+	 * Checks whether a variable is a string and contains at least one character.
+	 * 
+	 * @param {*} string - A variable to check.
+	 * @returns {boolean} - `true` is the given variable is an string with length > 0, `false` otherwise.
+	 */
+	static hasText(string) {
+		return (typeof string === 'string' && string.length > 0);
 	}
 
 	/**

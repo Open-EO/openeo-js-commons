@@ -7,6 +7,7 @@ const ProcessDataType = require('./processDataType');
 const ProcessParameter = require('./processParameter');
 const ProcessSchema = require('./processSchema');
 const ProcessUtils = require('./processUtils');
+const ProcessRegistry = require('./processRegistry');
 // Others
 const Versions = require('./versions');
 const Utils = require('./utils');
@@ -19,6 +20,7 @@ module.exports = {
 	ProcessParameter,
 	ProcessSchema,
 	ProcessUtils,
+	ProcessRegistry,
 	Versions,
 	Utils,
 };

@@ -1,0 +1,480 @@
+[
+  {
+    "id": "absolute",
+    "summary": "Absolute value",
+    "description": "Computes the absolute value of a real number `x`, which is the \"unsigned\" portion of x and often denoted as *|x|*.\n\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+      "math"
+    ],
+    "parameters": [
+      {
+        "name": "x",
+        "description": "A number.",
+        "schema": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    ],
+    "returns": {
+      "description": "The computed absolute value.",
+      "schema": {
+        "type": [
+          "number",
+          "null"
+        ],
+        "minimum": 0
+      }
+    },
+    "examples": [
+      {
+        "arguments": {
+          "x": 0
+        },
+        "returns": 0
+      },
+      {
+        "arguments": {
+          "x": 3.5
+        },
+        "returns": 3.5
+      },
+      {
+        "arguments": {
+          "x": -0.4
+        },
+        "returns": 0.4
+      },
+      {
+        "arguments": {
+          "x": -3.5
+        },
+        "returns": 3.5
+      }
+    ],
+    "links": [
+      {
+        "rel": "about",
+        "href": "http://mathworld.wolfram.com/AbsoluteValue.html",
+        "title": "Absolute value explained by Wolfram MathWorld"
+      }
+    ],
+    "process_graph": {
+      "lt": {
+        "process_id": "lt",
+        "arguments": {
+          "x": {
+            "from_parameter": "x"
+          },
+          "y": 0
+        }
+      },
+      "multiply": {
+        "process_id": "multiply",
+        "arguments": {
+          "x": {
+            "from_parameter": "x"
+          },
+          "y": -1
+        }
+      },
+      "if": {
+        "process_id": "if",
+        "arguments": {
+          "value": {
+            "from_node": "lt"
+          },
+          "accept": {
+            "from_node": "multiply"
+          },
+          "reject": {
+            "from_parameter": "x"
+          }
+        },
+        "result": true
+      }
+    }
+  },
+  {
+    "id": "add_dimension",
+    "summary": "Add a new dimension",
+    "description": "Adds a new named dimension to the data cube.\n\nAfterwards, the dimension can be referred to with the specified `name`. If a dimension with the specified name exists, the process fails with a `DimensionExists` exception. The dimension label of the dimension is set to the specified `label`.",
+    "categories": [
+      "cubes"
+    ],
+    "parameters": [
+      {
+        "name": "data",
+        "description": "A data cube to add the dimension to.",
+        "schema": {
+          "type": "object",
+          "subtype": "raster-cube"
+        }
+      },
+      {
+        "name": "name",
+        "description": "Name for the dimension.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "label",
+        "description": "A dimension label.",
+        "schema": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "name": "type",
+        "description": "The type of dimension, defaults to `other`.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "spatial",
+            "temporal",
+            "bands",
+            "other"
+          ]
+        },
+        "default": "other",
+        "optional": true
+      }
+    ],
+    "returns": {
+      "description": "The data cube with a newly added dimension. The new dimension has exactly one dimension label. All other dimensions remain unchanged.",
+      "schema": {
+        "type": "object",
+        "subtype": "raster-cube"
+      }
+    },
+    "exceptions": {
+      "DimensionExists": {
+        "message": "A dimension with the specified name already exists."
+      }
+    }
+  },
+  {
+    "id": "add",
+    "summary": "Addition of two numbers",
+    "description": "Sums up the two numbers `x` and `y` (*`x + y`*) and returns the computed sum.\n\nNo-data values are taken into account so that `null` is returned if any element is such a value.\n\nThe computations follow [IEEE Standard 754](https://ieeexplore.ieee.org/document/8766229) whenever the processing environment supports it.",
+    "categories": [
+      "math"
+    ],
+    "parameters": [
+      {
+        "name": "x",
+        "description": "The first summand.",
+        "schema": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      {
+        "name": "y",
+        "description": "The second summand.",
+        "schema": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    ],
+    "returns": {
+      "description": "The computed sum of the two numbers.",
+      "schema": {
+        "type": [
+          "number",
+          "null"
+        ]
+      }
+    },
+    "examples": [
+      {
+        "arguments": {
+          "x": 5,
+          "y": 2.5
+        },
+        "returns": 7.5
+      },
+      {
+        "arguments": {
+          "x": -2,
+          "y": -4
+        },
+        "returns": -6
+      },
+      {
+        "arguments": {
+          "x": 1,
+          "y": null
+        },
+        "returns": null
+      }
+    ],
+    "links": [
+      {
+        "rel": "about",
+        "href": "http://mathworld.wolfram.com/Sum.html",
+        "title": "Sum explained by Wolfram MathWorld"
+      },
+      {
+        "rel": "about",
+        "href": "https://ieeexplore.ieee.org/document/8766229",
+        "title": "IEEE Standard 754-2019 for Floating-Point Arithmetic"
+      }
+    ],
+    "process_graph": {
+      "sum": {
+        "process_id": "sum",
+        "arguments": {
+          "data": [
+            {
+              "from_parameter": "x"
+            },
+            {
+              "from_parameter": "y"
+            }
+          ],
+          "ignore_nodata": false
+        },
+        "result": true
+      }
+    }
+  },
+  {
+    "id": "aggregate_spatial",
+    "summary": "Zonal statistics for geometries",
+    "description": "Aggregates statistics for one or more geometries (e.g. zonal statistics for polygons) over the spatial dimensions. The number of total and valid pixels is returned together with the calculated values.\n\nAn 'unbounded' aggregation over the full extent of the horizontal spatial dimensions can be computed with the process ``reduce_spatial()``.\n\nThis process passes a list of values to the reducer. The list of values has an undefined order, therefore processes such as ``last()`` and ``first()`` that depend on the order of the values will lead to unpredictable results.",
+    "categories": [
+      "cubes",
+      "aggregate & resample"
+    ],
+    "parameters": [
+      {
+        "name": "data",
+        "description": "A raster data cube.\n\nThe data cube must have been reduced to only contain two spatial dimensions and a third dimension the values are aggregated for, for example the temporal dimension to get a time series. Otherwise, this process fails with the `TooManyDimensions` exception.\n\nThe data cube implicitly gets restricted to the bounds of the geometries as if ``filter_spatial()`` would have been used with the same values for the corresponding parameters immediately before this process.",
+        "schema": {
+          "type": "object",
+          "subtype": "raster-cube"
+        }
+      },
+      {
+        "name": "geometries",
+        "description": "Geometries as GeoJSON on which the aggregation will be based.\n\nOne value will be computed per GeoJSON `Feature`, `Geometry` or `GeometryCollection`. For a `FeatureCollection` multiple values will be computed, one value per contained `Feature`. For example, a single value will be computed for a `MultiPolygon`, but two values will be computed for a `FeatureCollection` containing two polygons.\n\n- For **polygons**, the process considers all pixels for which the point at the pixel center intersects with the corresponding polygon (as defined in the Simple Features standard by the OGC).\n- For **points**, the process considers the closest pixel center.\n- For **lines** (line strings), the process considers all the pixels whose centers are closest to at least one point on the line.\n\nThus, pixels may be part of multiple geometries and be part of multiple aggregations.\n\nTo maximize interoperability, a nested `GeometryCollection` should be avoided. Furthermore, a `GeometryCollection` composed of a single type of geometries should be avoided in favour of the corresponding multi-part type (e.g. `MultiPolygon`).",
+        "schema": {
+          "type": "object",
+          "subtype": "geojson"
+        }
+      },
+      {
+        "name": "reducer",
+        "description": "A reducer to be applied on all values of each geometry. A reducer is a single process such as ``mean()`` or a set of processes, which computes a single value for a list of values, see the category 'reducer' for such processes.",
+        "schema": {
+          "type": "object",
+          "subtype": "process-graph",
+          "parameters": [
+            {
+              "name": "data",
+              "description": "An array with elements of any type.",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "description": "Any data type."
+                }
+              }
+            },
+            {
+              "name": "context",
+              "description": "Additional data passed by the user.",
+              "schema": {
+                "description": "Any data type."
+              },
+              "optional": true,
+              "default": null
+            }
+          ],
+          "returns": {
+            "description": "The value to be set in the vector data cube.",
+            "schema": {
+              "description": "Any data type."
+            }
+          }
+        }
+      },
+      {
+        "name": "target_dimension",
+        "description": "The new dimension name to be used for storing the results. Defaults to `result`.",
+        "schema": {
+          "type": "string"
+        },
+        "default": "result",
+        "optional": true
+      },
+      {
+        "name": "context",
+        "description": "Additional data to be passed to the reducer.",
+        "schema": {
+          "description": "Any data type."
+        },
+        "optional": true,
+        "default": null
+      }
+    ],
+    "returns": {
+      "description": "A vector data cube with the computed results and restricted to the bounds of the geometries.\n\nThe computed value is used for the dimension with the name that was specified in the parameter `target_dimension`.\n\nThe computation also stores information about the total count of pixels (valid + invalid pixels) and the number of valid pixels (see ``is_valid()``) for each geometry. These values are added as a new dimension with a dimension name derived from `target_dimension` by adding the suffix `_meta`. The new dimension has the dimension labels `total_count` and `valid_count`.",
+      "schema": {
+        "type": "object",
+        "subtype": "vector-cube"
+      }
+    },
+    "exceptions": {
+      "TooManyDimensions": {
+        "message": "The number of dimensions must be reduced to three for `aggregate_spatial`."
+      }
+    },
+    "links": [
+      {
+        "href": "https://openeo.org/documentation/1.0/datacubes.html#aggregate",
+        "rel": "about",
+        "title": "Aggregation explained in the openEO documentation"
+      },
+      {
+        "href": "http://www.opengeospatial.org/standards/sfa",
+        "rel": "about",
+        "title": "Simple Features standard by the OGC"
+      }
+    ]
+  },
+  {
+    "id": "aggregate_temporal_period",
+    "summary": "Temporal aggregations based on calendar hierarchies",
+    "description": "Computes a temporal aggregation based on calendar hierarchies such as years, months or seasons. For other calendar hierarchies ``aggregate_temporal()`` can be used.\n\nFor each interval, all data along the dimension will be passed through the reducer.\n\nIf the dimension is not set or is set to `null`, the data cube is expected to only have one temporal dimension.",
+    "categories": [
+      "aggregate & resample",
+      "climatology",
+      "cubes"
+    ],
+    "parameters": [
+      {
+        "name": "data",
+        "description": "A data cube.",
+        "schema": {
+          "type": "object",
+          "subtype": "raster-cube"
+        }
+      },
+      {
+        "name": "period",
+        "description": "The time intervals to aggregate. The following pre-defined values are available:\n\n* `hour`: Hour of the day\n* `day`: Day of the year\n* `week`: Week of the year\n* `dekad`: Ten day periods, counted per year with three periods per month (day 1 - 10, 11 - 20 and 21 - end of month). The third dekad of the month can range from 8 to 11 days. For example, the fourth dekad is Feb, 1 - Feb, 10 each year.\n* `month`: Month of the year\n* `season`: Three month periods of the calendar seasons (December - February, March - May, June - August, September - November).\n* `tropical-season`: Six month periods of the tropical seasons (November - April, May - October).\n* `year`: Proleptic years\n* `decade`: Ten year periods ([0-to-9 decade](https://en.wikipedia.org/wiki/Decade#0-to-9_decade)), from a year ending in a 0 to the next year ending in a 9.\n* `decade-ad`: Ten year periods ([1-to-0 decade](https://en.wikipedia.org/wiki/Decade#1-to-0_decade)) better aligned with the anno Domini (AD) calendar era, from a year ending in a 1 to the next year ending in a 0.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "hour",
+            "day",
+            "week",
+            "dekad",
+            "month",
+            "season",
+            "tropical-season",
+            "year",
+            "decade",
+            "decade-ad"
+          ]
+        }
+      },
+      {
+        "name": "reducer",
+        "description": "A reducer to be applied for the values contained in each period. A reducer is a single process such as ``mean()`` or a set of processes, which computes a single value for a list of values, see the category 'reducer' for such processes. Periods may not contain any values, which for most reducers leads to no-data (`null`) values by default.",
+        "schema": {
+          "type": "object",
+          "subtype": "process-graph",
+          "parameters": [
+            {
+              "name": "data",
+              "description": "A labeled array with elements of any type. If there's no data for the period, the array is empty.",
+              "schema": {
+                "type": "array",
+                "subtype": "labeled-array",
+                "items": {
+                  "description": "Any data type."
+                }
+              }
+            },
+            {
+              "name": "context",
+              "description": "Additional data passed by the user.",
+              "schema": {
+                "description": "Any data type."
+              },
+              "optional": true,
+              "default": null
+            }
+          ],
+          "returns": {
+            "description": "The value to be set in the new data cube.",
+            "schema": {
+              "description": "Any data type."
+            }
+          }
+        }
+      },
+      {
+        "name": "dimension",
+        "description": "The name of the temporal dimension for aggregation. All data along the dimension is passed through the specified reducer. If the dimension is not set or set to `null`, the data cube is expected to only have one temporal dimension. Fails with a `TooManyDimensions` exception if it has more dimensions. Fails with a `DimensionNotAvailable` exception if the specified dimension does not exist.",
+        "schema": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "optional": true,
+        "default": null
+      },
+      {
+        "name": "context",
+        "description": "Additional data to be passed to the reducer.",
+        "schema": {
+          "description": "Any data type."
+        },
+        "optional": true,
+        "default": null
+      }
+    ],
+    "returns": {
+      "description": "A new data cube with the same dimensions. The dimension properties (name, type, labels, reference system and resolution) remain unchanged, except for the resolution and dimension labels of the given temporal dimension. The specified temporal dimension has the following dimension labels (`YYYY` = four-digit year, `MM` = two-digit month, `DD` two-digit day of month):\n\n* `hour`: `YYYY-MM-DD-00` - `YYYY-MM-DD-23`\n* `day`: `YYYY-001` - `YYYY-365`\n* `week`: `YYYY-01` - `YYYY-52`\n* `dekad`: `YYYY-00` - `YYYY-36`\n* `month`: `YYYY-01` - `YYYY-12`\n* `season`: `YYYY-djf` (December - February), `YYYY-mam` (March - May), `YYYY-jja` (June - August), `YYYY-son` (September - November).\n* `tropical-season`: `YYYY-ndjfma` (November - April), `YYYY-mjjaso` (May - October).\n* `year`: `YYYY`\n* `decade`: `YYY0`\n* `decade-ad`: `YYY1`",
+      "schema": {
+        "type": "object",
+        "subtype": "raster-cube"
+      }
+    },
+    "exceptions": {
+      "TooManyDimensions": {
+        "message": "The data cube contains multiple temporal dimensions. The parameter `dimension` must be specified."
+      },
+      "DimensionNotAvailable": {
+        "message": "A dimension with the specified name does not exist."
+      },
+      "DistinctDimensionLabelsRequired": {
+        "message": "The dimension labels have duplicate values. Distinct labels must be specified."
+      }
+    },
+    "links": [
+      {
+        "href": "https://openeo.org/documentation/1.0/datacubes.html#aggregate",
+        "rel": "about",
+        "title": "Aggregation explained in the openEO documentation"
+      }
+    ]
+  }
+]

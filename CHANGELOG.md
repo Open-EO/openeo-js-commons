@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New class (migrated over from JS Processgraphs): `ProcessRegistry`
+
 ## [1.3.0] - 2021-07-05
 
 ### Added

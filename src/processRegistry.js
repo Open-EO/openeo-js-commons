@@ -11,12 +11,18 @@ class ProcessRegistry {
 	/**
 	 * Creates a new registry of all processes.
 	 * 
-	 * @param {Array.<object>} [processes=[]] Optionally, a list of predefined processes
+	 * @param {Array.<object>|ProcessRegistry} [processes=[]] Optionally, a list of predefined processes
 	 */
 	constructor(processes = []) {
-		// Keys added to this object must be lowercase!
 		this.processes = {};
-		this.addAll(processes);
+		if (processes instanceof ProcessRegistry) {
+			for(let namespace in processes.processes) {
+				this.addAll(processes.processes[namespace]);
+			}
+		}
+		else {
+			this.addAll(processes);
+		}
 	}
 
 	/**
@@ -48,11 +54,10 @@ class ProcessRegistry {
 			throw new Error("Invalid namespace; not a string.");
 		}
 
-		namespace = namespace.toLowerCase();
 		if (!this.processes[namespace]) {
 			this.processes[namespace] = {};
 		}
-		this.processes[namespace][process.id.toLowerCase()] = process;
+		this.processes[namespace][process.id] = process;
 	}
 
 	/**
@@ -87,7 +92,16 @@ class ProcessRegistry {
 		if(typeof namespace !== 'string') {
 			return false;
 		}
-		return Boolean(this.processes[namespace.toLowerCase()]);
+		return Boolean(this.processes[namespace]);
+	}
+
+	/**
+	 * Returns a (sorted) list of all available namespaces.
+	 * 
+	 * @returns {Array.<string>} 
+	 */
+	namespaces() {
+		return Object.keys(this.processes).sort();
 	}
 
 	/**
@@ -102,7 +116,7 @@ class ProcessRegistry {
 		if(typeof namespace !== 'string') {
 			return [];
 		}
-		let processes = this.processes[namespace.toLowerCase()];
+		let processes = this.processes[namespace];
 		return processes ? Object.values(processes) : [];
 	}
 
@@ -140,8 +154,6 @@ class ProcessRegistry {
 			return this.get(id, 'user') || this.get(id, 'backend');
 		}
 
-		id = id.toLowerCase();
-		namespace = namespace.toLowerCase();
 		if (this.processes[namespace]) {
 			return this.processes[namespace][id] || null;
 		}
@@ -167,10 +179,8 @@ class ProcessRegistry {
 			return false;
 		}
 
-		namespace = namespace.toLowerCase();
 		if (this.processes[namespace]) {
 			if (typeof id === 'string') {
-				id = id.toLowerCase();
 				if (this.processes[namespace][id]) {
 					delete this.processes[namespace][id];
 					if (Utils.size(this.processes[namespace]) === 0) {

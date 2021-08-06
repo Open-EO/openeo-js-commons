@@ -69,6 +69,8 @@ describe('Registry Tests', () => {
 		expect(registry.namespace('foobar')).toEqual([helloWorld]);
 		expect(registry.namespace('user')).toEqual([custom]);
 		expect(registry.namespace('invalid')).toEqual([]);
+
+		expect(registry.namespaces()).toEqual(['backend', 'foobar', 'user']);
 	});
 
 	test('Get all processes', () => {
@@ -125,6 +127,17 @@ describe('Registry Tests', () => {
 		expect(registry.hasNamespace('user')).toBeTruthy();
 		expect(registry.remove());
 		expect(registry.hasNamespace('user')).toBeFalsy();
+	});
+
+	test('Clone registry', () => {
+		let registry1 = new ProcessRegistry();
+		registry1.add(custom, 'user');
+		expect(registry1.count()).toBe(1);
+		let registry2 = new ProcessRegistry(registry1);
+		expect(registry2.count()).toBe(1);
+		registry1.remove(custom.id, 'user');
+		expect(registry1.count()).toBe(0);
+		expect(registry2.count()).toBe(1);
 	});
 
 });

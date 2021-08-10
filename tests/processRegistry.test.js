@@ -140,4 +140,28 @@ describe('Registry Tests', () => {
 		expect(registry2.count()).toBe(1);
 	});
 
+	
+	test('Events', () => {
+		let registry1 = new ProcessRegistry();
+		let called = [];
+		registry1.listeners.push((a,b,c) => called.push([a,b,c]));
+
+		registry1.add(helloWorld, 'foobar');
+		let addEvent = ['add', helloWorld, 'foobar'];
+		expect(called).toEqual([addEvent]);
+
+		registry1.remove(null, 'foobar');
+		let removeEvent = ['remove', null, 'foobar'];
+		expect(called).toEqual([addEvent, removeEvent]);
+	});
+
+	test('Add namespace property', () => {
+		let registry1 = new ProcessRegistry([], true);
+		registry1.add(custom, 'user');
+		expect(custom.namespace).toBeUndefined();
+		let newCustom = registry1.get(custom.id);
+		expect(newCustom).not.toBeNull();
+		expect(newCustom.namespace).toBe('user');
+	});
+
 });

@@ -11,10 +11,29 @@ class ProcessRegistry {
 	/**
 	 * Creates a new registry of all processes.
 	 * 
-	 * @param {Array.<object>|ProcessRegistry} [processes=[]] Optionally, a list of predefined processes
+	 * @param {Array.<object>|ProcessRegistry} [processes=[]] - Optionally, a list of predefined processes.
+	 * @param {boolean} [addNamespace=false] - Add a namespace property to processes if set to `true`.
 	 */
-	constructor(processes = []) {
+	constructor(processes = [], addNamespace = false) {
+		/**
+		 * List of listeners for change events.
+		 * @public
+		 */
+		this.listeners = [];
+		/**
+		 * Object of namespaces and processes.
+		 * @protected
+		 * @type {object.<string,object.<string,object>>}
+		 */
 		this.processes = {};
+		/**
+		 * Add a namespace property to processes if set to `true`.
+		 * @protected
+		 * @type {boolean}
+		 */
+		this.addNamespace = addNamespace;
+
+		// Fill process list
 		if (processes instanceof ProcessRegistry) {
 			for(let namespace in processes.processes) {
 				this.addAll(processes.processes[namespace]);
@@ -26,24 +45,46 @@ class ProcessRegistry {
 	}
 
 	/**
+	 * Event that is fired on changes, notifies listeners.
+	 * 
+	 * @param {string} event - One of 'add', 'addAll' or 'remove'.
+	 * @param {*} data 
+	 * @param {string} namespace 
+	 */
+	onChange(event, data, namespace) {
+		for(let listener of this.listeners) {
+			listener(event, data, namespace);
+		}
+	}
+
+	/**
 	 * Adds a list of processes for a given namespace.
+	 * 
+	 * Replaces an existing process in the given namespace if it exists.
+	 * 
+	 * Fires 'addAll' event.
 	 * 
 	 * @param {Array.<object>} processes Optionally, a list of processes
 	 * @param {string} [namespace="backend"] The namespace for the processes (defaults to 'backend', i.e. pre-defined processes)
 	 */
 	addAll(processes, namespace = 'backend') {
 		for(var i in processes) {
-			this.add(processes[i], namespace);
+			this.add(processes[i], namespace, false);
 		}
+		this.onChange('addAll', processes, namespace);
 	}
 
 	/**
 	 * Adds a single process to a given namespace.
 	 * 
+	 * Replaces an existing process in the given namespace if it exists.
+	 * 
+	 * Fires 'add' event.
+	 * 
 	 * @param {object} processes A process definition
 	 * @param {string} [namespace="backend"] The namespace for the process (defaults to 'backend', i.e. pre-defined processes)
 	 */
-	add(process, namespace = 'backend') {
+	add(process, namespace = 'backend', fireEvent = true) {
 		if (!Utils.isObject(process)) {
 			throw new Error("Invalid process; not an object.");
 		}
@@ -57,7 +98,11 @@ class ProcessRegistry {
 		if (!this.processes[namespace]) {
 			this.processes[namespace] = {};
 		}
+		process = Object.assign(this.addNamespace ? {namespace} : {}, process);
 		this.processes[namespace][process.id] = process;
+		if (fireEvent) {
+			this.onChange('add', process, namespace);
+		}
 	}
 
 	/**
@@ -170,6 +215,8 @@ class ProcessRegistry {
 	 * 
 	 * Returns `true` on succes, `false` on failure.
 	 * 
+	 * Fires 'remove' event.
+	 * 
 	 * @param {?string} [id=null] The process identifier
 	 * @param {?string} [namespace="user"] The namespace, defaults to `user`
 	 * @returns {boolean}
@@ -182,15 +229,18 @@ class ProcessRegistry {
 		if (this.processes[namespace]) {
 			if (typeof id === 'string') {
 				if (this.processes[namespace][id]) {
+					let process = this.processes[namespace][id];
 					delete this.processes[namespace][id];
 					if (Utils.size(this.processes[namespace]) === 0) {
 						delete this.processes[namespace];
 					}
+					this.onChange('remove', process, namespace);
 					return true;
 				}
 			}
 			else {
 				delete this.processes[namespace];
+				this.onChange('remove', null, namespace);
 				return true;
 			}
 		}

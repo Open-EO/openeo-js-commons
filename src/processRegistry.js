@@ -3,7 +3,6 @@ const Utils = require('./utils');
 /**
  * Central registry for processes.
  * 
- * @todo Doku
  * @class
  */
 class ProcessRegistry {

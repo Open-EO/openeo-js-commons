@@ -89,11 +89,18 @@ class ProcessUtils {
 
 		let cbParams = [];
 		for(let schema of schemas) {
-			if (Array.isArray(schema.parameters)) {
-				if (cbParams.length > 0 && !Utils.equals(cbParams, schema.parameters)) {
+			let params = null;
+			if (Array.isArray(schema.parameters)) { // For "normal" callbacks
+				params = schema.parameters;
+			}
+			else if (Utils.isObject(schema.additionalProperties) && Array.isArray(schema.additionalProperties.parameters)) {
+				params = schema.additionalProperties.parameters; // Used for metadata-filter
+			}
+			if (Array.isArray(params)) {
+				if (cbParams.length > 0 && !Utils.equals(cbParams, params)) {
 					throw new Error("Multiple schemas with different callback parameters found.");
 				}
-				cbParams = schema.parameters;
+				cbParams = params;
 			}
 		}
 

@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2022-05-23
+
+### Fixed
+
+- Callback parameters for type `metadata-filter` (in `additionalProperties`) get detected properly.
+
 ## [1.4.0] - 2021-08-09
 
 ### Added
@@ -59,7 +65,8 @@ First release supporting openEO API 1.0.0.
 
 All prior releases have been documented in the [GitHub Releases](https://github.com/Open-EO/openeo-js-commons/releases).
 
-[Unreleased]: <https://github.com/Open-EO/openeo-js-commons/compare/v1.4.0...HEAD>
+[Unreleased]: <https://github.com/Open-EO/openeo-js-commons/compare/v1.4.1...HEAD>
+[1.4.1]: <https://github.com/Open-EO/openeo-js-commons/compare/v1.4.0...v1.4.1>
 [1.4.0]: <https://github.com/Open-EO/openeo-js-commons/compare/v1.3.0...v1.4.0>
 [1.3.0]: <https://github.com/Open-EO/openeo-js-commons/compare/v1.2.0...v1.3.0>
 [1.2.0]: <https://github.com/Open-EO/openeo-js-commons/compare/v1.1.1...v1.2.0>

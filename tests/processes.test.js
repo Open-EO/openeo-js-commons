@@ -200,6 +200,49 @@ describe('Process(Parameter|Schema|DataType) Tests', () => {
 		expect(obj.default()).toBe(_default);
 	});
 
+	test('ProcessDataType (metadata-filter)', () => {
+		let params = [
+			{
+				"name": "value",
+				"description": "The property value to be checked against.",
+				"schema": {
+					"description": "Any data type."
+				}
+			}
+		];
+		let schema = {
+			"type": "object",
+			"subtype": "metadata-filter",
+			"title": "Filters",
+			"description": "A list of filters to check against. Specify key-value-pairs with the key being the name of the metadata property name and the value being a process evaluated against the metadata values.",
+			"additionalProperties": {
+				"type": "object",
+				"subtype": "process-graph",
+				"parameters": params,
+				"returns": {
+					"description": "`true` if the data should be loaded into the data cube, otherwise `false`.",
+					"schema": {
+						"type": "boolean"
+					}
+				}
+			}
+		};
+
+		let obj = new ProcessDataType(schema);
+		expect(obj.schema).toEqual(schema);
+
+		expect(obj.toJSON()).toEqual(schema);
+		expect(obj.isAny()).toBe(false);
+		expect(obj.isNull()).toBe(false);
+		expect(obj.nullable()).toBe(false);
+		expect(obj.isEditable()).toBe(true);
+		expect(obj.dataType()).toBe("metadata-filter");
+		expect(obj.nativeDataType()).toBe("object");
+		expect(obj.getCallbackParameters()).toEqual(params);
+		expect(obj.group()).toBe("Other");
+		expect(obj.title()).toBe("Filters");
+	});
+
 	test('ProcessDataType (any)', () => {
 		let obj = new ProcessDataType({}, null, {});
 		expect(obj.toJSON()).toEqual({

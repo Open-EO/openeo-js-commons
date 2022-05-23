@@ -123,7 +123,15 @@ class ProcessDataType {
 	 * @returns {array<object>}
 	 */
 	getCallbackParameters() {
-		return Array.isArray(this.schema.parameters) ? this.schema.parameters : [];
+		if (Array.isArray(this.schema.parameters)) { // For "normal" callbacks
+			return this.schema.parameters;
+		}
+		else if (Utils.isObject(this.schema.additionalProperties) && Array.isArray(this.schema.additionalProperties.parameters)) {
+			return this.schema.additionalProperties.parameters; // Used for metadata-filter
+		}
+		else {
+			return [];
+		}
 	}
 
 	/**

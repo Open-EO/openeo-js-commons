@@ -206,7 +206,8 @@ ProcessDataType.DEFAULT_GROUP = 'Other';
 ProcessDataType.NON_EDITABLE = [
 	'raster-cube',
 	'vector-cube',
-	'labeled-array'
+	'labeled-array',
+	'datacube'
 ];
 
 module.exports = ProcessDataType;

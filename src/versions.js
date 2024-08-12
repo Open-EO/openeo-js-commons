@@ -1,34 +1,34 @@
-const VersionCompare = require('compare-versions');
+const { compare, compareVersions, validate } = require('compare-versions');
 
 /** Version Number related methods */
 class Versions {
 
-  /**
-   * Compare [semver](https://semver.org/) version strings.
-   * 
-   * @param {string} firstVersion First version to compare
-   * @param {string} secondVersion Second version to compare
-   * @param {string|null} operator Optional; Arithmetic operator to use (>, >=, =, <=, <, !=). Defaults to `null`.
-   * @returns {boolean|integer} If operator is not `null`: true` if the comparison between the firstVersion and the secondVersion satisfies the operator, `false` otherwise. If operator is `null`: Numeric value compatible with the [Array.sort(fn) interface](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#Parameters).
-   * ```
-   */
-    static compare(v1, v2, operator = null) {
+	/**
+	 * Compare [semver](https://semver.org/) version strings.
+	 * 
+	 * @param {string} firstVersion First version to compare
+	 * @param {string} secondVersion Second version to compare
+	 * @param {string|null} operator Optional; Arithmetic operator to use (>, >=, =, <=, <, !=). Defaults to `null`.
+	 * @returns {boolean|integer} If operator is not `null`: true` if the comparison between the firstVersion and the secondVersion satisfies the operator, `false` otherwise. If operator is `null`: Numeric value compatible with the [Array.sort(fn) interface](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#Parameters).
+	 * ```
+	 */
+	static compare(v1, v2, operator = null) {
 		if (operator !== null) {
-			return VersionCompare.compare(v1, v2, operator);
+			return compare(v1, v2, operator);
 		}
 		else {
-			return VersionCompare(v1, v2);
+			return compareVersions(v1, v2);
 		}
 	}
 
-  /**
-   * Validate [semver](https://semver.org/) version strings.
-   * 
-   * @param {*} version - Version number to validate
-   * @returns - `true` if the version number is a valid semver version number, `false` otherwise.
-   */
+	/**
+	 * Validate [semver](https://semver.org/) version strings.
+	 * 
+	 * @param {*} version - Version number to validate
+	 * @returns - `true` if the version number is a valid semver version number, `false` otherwise.
+	 */
 	static validate(version) {
-		return VersionCompare.validate(version);
+		return validate(version);
 	}
 
 	/**

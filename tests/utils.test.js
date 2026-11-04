@@ -163,6 +163,11 @@ describe('Utils Tests', () => {
 		expect(Utils.prettifyString(["aBC"])).toBe("A BC");
 		expect(Utils.prettifyString(["it's", "my", "life"], " ")).toBe("It's my Life");
 		expect(Utils.prettifyString(["abc-def", "xyz"])).toBe("Abc Def; Xyz");
+		expect(Utils.prettifyString("stac_1_collection_items")).toBe("Stac 1 Collection Items");
+		expect(Utils.prettifyString("a_b_c")).toBe("A B C");
+		expect(Utils.prettifyString("x-y-z")).toBe("X Y Z");
+		expect(Utils.prettifyString("_foo__bar_")).toBe("_foo__bar_");
+		expect(Utils.prettifyString("foo_-_bar")).toBe("Foo_-_bar");
 
 		expect(Utils.prettifyString({})).toBe("[object Object]");
 		expect(Utils.prettifyString(new Hello())).toBe("[object Object]");

@@ -2,12 +2,23 @@ name: JS Commons Documentation
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to deploy the documentation for, e.g. v1.5.0'
+        required: true
+permissions:
+  contents: write
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v4
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 'lts/*'
       - run: npm install
       - run: npm run docs
       - uses: peaceiris/actions-gh-pages@v4

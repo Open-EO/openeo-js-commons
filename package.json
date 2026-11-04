@@ -1,6 +1,6 @@
 {
   "name": "@openeo/js-commons",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "apiVersions": [
     "0.4.x",
     "1.0.x"
@@ -15,11 +15,11 @@
   "license": "Apache-2.0",
   "homepage": "http://openeo.org",
   "bugs": {
-    "url": "https://github.com/open-eo/openeo-js-commons/issues"
+    "url": "https://github.com/Open-EO/openeo-js-commons/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/open-eo/openeo-js-commons.git"
+    "url": "git+https://github.com/Open-EO/openeo-js-commons.git"
   },
   "main": "src/main.js",
   "files": [

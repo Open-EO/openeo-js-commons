@@ -2,13 +2,12 @@
 
 A set of common JavaScript functionalities for [openEO](http://openeo.org).
 
-The [master branch](https://github.com/Open-EO/openeo-api/tree/master) is the 'stable' version of library, which is currently version **1.5.0**.
-The [draft branch](https://github.com/Open-EO/openeo-api/tree/draft) is where active development takes place.
+The `main` branch is where active development takes place. The latest released version is **1.5.0**.
 
 ![Dependencies](https://img.shields.io/librariesio/release/npm/@openeo/js-commons)
 ![Minified Size](https://img.shields.io/bundlephobia/min/@openeo/js-commons/1.5.0)
 ![Minzipped Size](https://img.shields.io/bundlephobia/minzip/@openeo/js-commons/1.5.0)
-![Supported API Versions](https://img.shields.io/github/package-json/apiVersions/Open-Eo/openeo-js-commons/master)
+![Supported API Versions](https://img.shields.io/github/package-json/apiVersions/Open-Eo/openeo-js-commons/main)
 ![JS Commons Tests](https://github.com/Open-EO/openeo-js-commons/workflows/JS%20Commons%20Tests/badge.svg)
 
 ## Features

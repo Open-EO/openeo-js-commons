@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `Utils.prettifyString`: Separators were not replaced after single-character words, e.g. `stac_1_collection_items`
+
 ## [1.5.0] - 2024-08-12
 
 ### Added

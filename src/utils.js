@@ -256,18 +256,18 @@ class Utils {
 		}
 		strings = strings.map(str => {
 			if (str.length >= 3) {
-				const replacer = (_,a,b) => a + ' ' + b.toUpperCase();
+				const replacer = (_,a) => ' ' + a.toUpperCase();
 				if (str.includes('_')) {
 					// Snake case converter
-					str = str.replace(/([a-zA-Z\d])_([a-zA-Z\d])/g, replacer);
+					str = str.replace(/(?<=[a-zA-Z\d])_([a-zA-Z\d])/g, replacer);
 				}
 				else if (str.includes('-')) {
 					// Kebab case converter
-					str = str.replace(/([a-zA-Z\d])-([a-zA-Z\d])/g, replacer);
+					str = str.replace(/(?<=[a-zA-Z\d])-([a-zA-Z\d])/g, replacer);
 				}
 				else {
 					// Camelcase converter
-					str = str.replace(/([a-z])([A-Z])/g, replacer);
+					str = str.replace(/(?<=[a-z])([A-Z])/g, replacer);
 				}
 				// Uppercase the first letter in the first word, too.
 				return str.charAt(0).toUpperCase() + str.substr(1);
